@@ -1,0 +1,11 @@
+parameters:
+  #...
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+  PSVneo\:
+    resource: '../src/*'
+    exclude: '../src/{Request,App.php}'
