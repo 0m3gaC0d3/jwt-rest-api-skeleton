@@ -2,34 +2,34 @@
 
 ## How to add a new endpoint
 
-* Create a new class and implement the interface `\PSVneo\Request\ApiRequestInterface`.
+* Create a new controller class like this.
 ```php
 <?php
 
-namespace PSVneo\Request;
+declare(strict_types=1);
 
+namespace App\Controller;
+
+use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use PSVneo\Request\ApiRequestInterface;
-use Slim\App as API;
 
-class MyNewEndpointRequest implements ApiRequestInterface
+class MyController
 {
-    public function handleRequest(API $api, string $route) : void
+    public function someAction(Container $container, Request $request, Response $response, array $args): Response
     {
-        $api->get($route, function (Request $request, Response $response, array $args) {
-            $response->getBody()->write('<h1>Hello world!</h1>');
+        $response->getBody()->write("Hello world");
 
-            return $response;
-        });
+        return $response;
     }
 }
-
 ```
-* Register your new class using the FQCN and the route (/my-endpoint) in `conf/routes.yaml`.
+* Register your new controller class using the FQCN,route (/my-endpoint), method, and action in `conf/routes.yaml`.
 ````yaml
 routes:
   -
-    class: PSVneo\Request\MyNewEndpointRequest
-    route: /my-endpoint
+    controller: App\Controller\MyController
+    action: get
+    route: /
+    method: get
 ````

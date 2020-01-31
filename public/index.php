@@ -14,5 +14,5 @@ $loader->load('services.yaml');
 $containerBuilder->compile();
 
 // Run the app
-$app = new \PSVneo\App($containerBuilder);
-$app->run();
+$kernel = new \App\Kernel($containerBuilder);
+$kernel->run();

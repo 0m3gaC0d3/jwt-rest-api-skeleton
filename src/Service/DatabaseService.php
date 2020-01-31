@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PSVneo\Service;
+namespace App\Service;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace PSVneo\Service;
+namespace App\Service;
 
-use PSVneo\Config\Loader\YamlRoutesLoader;
+use App\Config\Loader\YamlRoutesLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;

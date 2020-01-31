@@ -1,4 +1,26 @@
 routes:
   -
-    class: PSVneo\Request\Standard\StandardRequest
+    controller: App\Controller\StandardController
+    action: get
     route: /
+    method: get
+  -
+    controller: App\Controller\StandardController
+    action: post
+    route: /
+    method: post
+  -
+    controller: App\Controller\StandardController
+    action: put
+    route: /
+    method: put
+  -
+    controller: App\Controller\StandardController
+    action: delete
+    route: /
+    method: delete
+  -
+    controller: App\Controller\StandardController
+    action: patch
+    route: /
+    method: patch

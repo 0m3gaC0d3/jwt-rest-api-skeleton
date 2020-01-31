@@ -1,6 +1,6 @@
 <?php
 
-namespace PSVneo\Config\Loader;
+namespace App\Config\Loader;
 
 use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Yaml\Yaml;

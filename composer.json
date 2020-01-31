@@ -1,5 +1,5 @@
 {
-    "name": "psvneo/jwt-server-example",
+    "name": "vendor/api",
     "description": "",
     "license": "MIT",
     "require": {
@@ -14,9 +14,12 @@
         "symfony/config": "^5.0",
         "symfony/yaml": "^5.0"
     },
+    "require-dev": {
+        "omegacode/t3-debugger-utility-standalone": "^1.0"
+    },
     "autoload": {
         "psr-4": {
-            "PSVneo\\": "src/"
+            "App\\": "src/"
         }
     }
 }

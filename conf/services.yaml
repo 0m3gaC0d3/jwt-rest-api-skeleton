@@ -5,10 +5,7 @@ services:
   _defaults:
     autowire: true
     autoconfigure: true
-    public: false
-  PSVneo\:
-    resource: '../src/*'
-    exclude: '../src/{Request,App.php}'
-
-  PSVneo\Service\ConfigurationFileService:
     public: true
+  App\:
+    resource: '../src/*'
+    exclude: '../src/{Manager,Controller,Config,Kernel.php}'
