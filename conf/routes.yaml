@@ -1,0 +1,4 @@
+routes:
+  -
+    class: PSVneo\Request\Standard\StandardRequest
+    route: /

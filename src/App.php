@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PSVneo;
 
 use PSVneo\Request\RouteManager;
+use PSVneo\Service\ConfigurationFileService;
 use Slim\Factory\AppFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -20,7 +21,7 @@ class App
     public function run(): void
     {
         $api = AppFactory::create();
-        $routeManager = new RouteManager($api);
+        $routeManager = new RouteManager($api, $this->container->get(ConfigurationFileService::class));
         $routeManager->registerRoutes();
         $api->run();
     }
