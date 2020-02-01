@@ -13,9 +13,13 @@ namespace App\Controller;
 use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Annotation\ControllerAnnotation;
 
 class MyController
 {
+    /**
+     * @ControllerAnnotation(route="/", method="get")
+     */
     public function someAction(Container $container, Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write("Hello world");
@@ -26,10 +30,6 @@ class MyController
 ```
 * Register your new controller class using the FQCN,route (/my-endpoint), method, and action in `conf/routes.yaml`.
 ````yaml
-routes:
-  -
-    controller: App\Controller\MyController
-    action: get
-    route: /
-    method: get
+controllers:
+  - App\Controller\MyController
 ````

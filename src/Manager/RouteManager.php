@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Manager;
 
+use App\Controller\ControllerInterface;
+use App\Controller\StandardController;
+use Doctrine\Common\Annotations\AnnotationReader;
+use OmegaCode\DebuggerUtility;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Service\ConfigurationFileService;
@@ -26,42 +30,29 @@ class RouteManager
 
     private ConfigurationFileService $configurationFileService;
 
-    public function __construct(API $api, ConfigurationFileService $configurationFileService)
-    {
+
+    public function __construct(
+        API $api,
+        ConfigurationFileService $configurationFileService
+
+    ) {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
     }
 
     public function registerRoutes()
     {
+
+        $controllerConfiguration = $this->getControllerConfigurations();
+
         $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
-        foreach ($routesConfiguration as $routeConfiguration) {
-            $this->validateRouteConfiguration($routeConfiguration);
-            $class = trim($routeConfiguration['controller']);
-            $route = trim($routeConfiguration['route']);
-            $method = trim($routeConfiguration['method']);
-            $action = trim($routeConfiguration['action']);
+        foreach ($controllerConfiguration as $configuration) {
+            $class = trim($configuration['controller']);
+            $route = trim($configuration['route']);
+            $method = trim($configuration['method']);
+            $action = trim($configuration['action']);
             $controller = new $class;
             $this->handleRequest($method, $route, $controller, $action);
-        }
-    }
-
-    protected function validateRouteConfiguration(array $routeConfiguration)
-    {
-        if (array_diff_key(array_flip(self::REQUIRED_PROPERTIES), $routeConfiguration)) {
-            throw new \RuntimeException("You have an error in your routes.yaml file");
-        }
-        if (!class_exists(trim($routeConfiguration['controller']))) {
-            throw new \InvalidArgumentException("The class ".$routeConfiguration['class']." does not exist");
-        }
-        if (empty(trim($routeConfiguration['route']))) {
-            throw new \InvalidArgumentException("The property route can not be empty");
-        }
-        if (empty(trim($routeConfiguration['method']))) {
-            throw new \InvalidArgumentException("The property method can not be empty");
-        }
-        if (empty(trim($routeConfiguration['action']))) {
-            throw new \InvalidArgumentException("The property action can not be empty");
         }
     }
 
@@ -72,12 +63,41 @@ class RouteManager
                 "The method $method is not allowed. Allowed methods are: ".implode(', ', self::ALLOWED_METHODS)
             );
         }
-        $action = $action."Action";
         $this->api->$method(
             $route,
             function (Request $request, Response $response, array $args) use ($controller, $action) {
                 return $controller->$action($this, $request, $response, $args);
             }
         );
+    }
+
+    private function getControllerConfigurations()
+    {
+        // todo refactor me
+        $configuration = [];
+        $reader = new AnnotationReader();
+        $controllerClasses = $this->configurationFileService->load('controllers.yaml')['controllers'];
+        foreach ($controllerClasses as $controllerClass ) {
+            $class = new \ReflectionClass($controllerClass);
+            $methods = $class->getMethods();
+            /** @var \ReflectionMethod $method */
+            foreach ($methods as $method) {
+                $methodAnnotations = $reader->getMethodAnnotations($method);
+                foreach ($methodAnnotations as $annotation) {
+                    if ($annotation instanceof \App\Annotation\ControllerAnnotation) {
+                        if (isset($configuration[$class->getName().'::'.$method->getName()])) {
+                            continue;
+                        }
+                        $configuration[$class->getName().'::'.$method->getName()] = [
+                            "controller" => $class->getName(),
+                            "method" => $annotation->method,
+                            "route" => $annotation->route,
+                            "action" => $method->getName()
+                        ];
+                    }
+                }
+            }
+        }
+        return $configuration;
     }
 }

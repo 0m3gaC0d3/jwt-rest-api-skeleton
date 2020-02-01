@@ -1,0 +1,2 @@
+controllers:
+  - App\Controller\StandardController
