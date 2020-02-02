@@ -8,7 +8,10 @@ use App\Factory\ContainerFactory;
 use App\Manager\RouteManager;
 use App\Service\ConfigurationFileService;
 use Slim\Factory\AppFactory;
+use Slim\ResponseEmitter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Slim\App as API;
+use Exception;
 
 class Kernel
 {
@@ -23,10 +26,15 @@ class Kernel
     {
         AppFactory::setContainer($this->container);
         $api = AppFactory::create();
-        $api->addBodyParsingMiddleware();
-        $routeManager = new RouteManager($api, $this->container->get(ConfigurationFileService::class));
-        $routeManager->registerRoutes();
-        $api->run();
+        try {
+            $api->addBodyParsingMiddleware();
+            $routeManager = new RouteManager($api, $this->container->get(ConfigurationFileService::class));
+            $routeManager->registerRoutes();
+            $api->run();
+        } catch (Exception $exception) {
+            // TODO: log error
+            $this->emitServerErrorResponse($api);
+        }
     }
 
     private function init()
@@ -44,5 +52,15 @@ class Kernel
             file_get_contents(__DIR__.'/../'.$_ENV['PRIVATE_KEY']),
             file_get_contents(__DIR__.'/../'.$_ENV['PUBLIC_KEY'])
         ));
+    }
+
+    private function emitServerErrorResponse(API $api)
+    {
+        $response = $api->getResponseFactory()->createResponse()
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500, 'Server Error');
+        $responseEmitter = new ResponseEmitter();
+        $responseEmitter->emit($response);
+        die();
     }
 }

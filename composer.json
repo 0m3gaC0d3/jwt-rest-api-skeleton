@@ -3,7 +3,6 @@
     "type": "project",
     "description": "This is a simple jwt based API skeleton to kick start your API development.",
     "homepage": "https://github.com/0m3gaC0d3/jwt-secured-api-skeleton",
-    ""
     "license": "MIT",
     "require": {
         "ext-json": "*",
@@ -19,7 +18,8 @@
         "http-interop/http-factory-guzzle": "^1.0",
         "lcobucci/jwt": "^3.3",
         "cakephp/chronos": "^2.0",
-        "monolog/monolog": "^2.0"
+        "monolog/monolog": "^2.0",
+        "ramsey/uuid": "^3.9"
     },
     "require-dev": {
         "omegacode/t3-debugger-utility-standalone": "^1.0"
@@ -33,10 +33,5 @@
         "psr-4": {
             "App\\Tests\\": "tests/"
         }
-    },
-    "scripts": {
-        "post-create-project-cmd": [
-            "php -f ./Install/build.php"
-        ]
     }
 }

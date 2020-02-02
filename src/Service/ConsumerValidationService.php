@@ -4,32 +4,32 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use Psr\Http\Message\ServerRequestInterface as Request;
+
 class ConsumerValidationService
 {
-    private ConfigurationFileService $configurationFileService;
-
-    public function __construct(ConfigurationFileService $configurationFileService)
+    public function isValid(Request $request): bool
     {
-        $this->configurationFileService = $configurationFileService;
-    }
-
-    public function isValid(string $clientId): bool
-    {
-        $clientConfiguration = (array) $this->configurationFileService->load('clients.yaml')['clients'];
-        if (count($clientConfiguration) === 0) {
+        $requestClientId = $this->getRequestClientId($request);
+        $clientConfiguration = (array) explode(',', $_ENV['CLIENT_IDS']);
+        if (0 === count($clientConfiguration)) {
             // todo: log no clients available
             return false;
         }
-        foreach ($clientConfiguration as $client) {
-            if (!isset($client['id'])) {
-                continue;
-            }
-            if ($clientId === $client['id']) {
+        foreach ($clientConfiguration as $allowedClientId) {
+            if ($requestClientId === $allowedClientId) {
                 // todo: log valid client id
                 return true;
             }
         }
         // todo: log invalid client id
         return false;
+    }
+
+    private function getRequestClientId(Request $request): string
+    {
+        $data = (array) $request->getParsedBody();
+
+        return (string) ($data['clientId'] ?? '');
     }
 }

@@ -13,7 +13,7 @@ use App\Annotation\ControllerAnnotation;
 class StandardController
 {
     /**
-     * @ControllerAnnotation(route="/", method="get")
+     * @ControllerAnnotation(route="/", method="get", protected=false)
      */
     public function getAction(Container $container, Request $request, Response $response, array $args): Response
     {

@@ -22,13 +22,11 @@ class AuthController
         $auth = $container->get('api.auth.jwt');
         /** @var ConsumerValidationService $consumerValidationService */
         $consumerValidationService = $container->get(ConsumerValidationService::class);
-        $data = (array) $request->getParsedBody();
-        $clientId = (string) ($data['clientId'] ?? '');
-        if (!$consumerValidationService->isValid($clientId)) {
+        if (!$consumerValidationService->isValid($request)) {
             return $response->withHeader('Content-Type', 'application/json')->withStatus(401, 'Unauthorized');
         }
         $result = [
-            'access_token' => $auth->createJwt($clientId),
+            'access_token' => $auth->createJwt([]),
             'token_type' => 'Bearer',
             'expires_in' => $auth->getLifetime(),
         ];

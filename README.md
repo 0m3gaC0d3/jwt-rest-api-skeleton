@@ -27,8 +27,12 @@ openssl genrsa -out private.pem 2048
 openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 ```
 
-## How to configure allowed clients / Add client ids.
-...
+## How to configure allowed clients / add client ids.
+Simple add your client ids to your `.env`:
+````dotenv
+CLIENT_IDS="sample-uid-1,sample-uid-2"
+````
+The client need this id to authenticate itself to your api.
 
 ## How to add a new endpoint
 * Create a new controller class like this.

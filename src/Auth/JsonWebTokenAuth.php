@@ -11,6 +11,7 @@ use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
+use Ramsey\Uuid\Uuid;
 
 final class JsonWebTokenAuth
 {
@@ -42,17 +43,19 @@ final class JsonWebTokenAuth
         return $this->lifetime;
     }
 
-    public function createJwt(string $clientId): string
+    public function createJwt(array $claims): string
     {
         $issuedAt = Chronos::now()->getTimestamp();
-
-        return (string)(new Builder())->issuedBy($this->issuer)
-            ->identifiedBy($clientId, true)
+        $builder = (new Builder())->issuedBy($this->issuer)
+            ->identifiedBy(Uuid::uuid4()->toString(), true)
             ->issuedAt($issuedAt)
             ->canOnlyBeUsedAfter($issuedAt)
-            ->expiresAt($issuedAt + $this->lifetime)
-            ->withClaim('client_id', $clientId)
-            ->getToken($this->signer, new Key($this->privateKey));
+            ->expiresAt($issuedAt + $this->lifetime);
+        foreach ($claims as $name => $value) {
+            $builder->withClaim($name, $value);
+        }
+
+        return (string)$builder->getToken($this->signer, new Key($this->privateKey));
     }
 
     public function createParsedToken(string $token): Token

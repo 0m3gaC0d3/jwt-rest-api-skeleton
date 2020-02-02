@@ -27,19 +27,13 @@ class JsonWebTokenMiddleware implements MiddlewareInterface
     {
         $authorization = explode(' ', (string)$request->getHeaderLine('Authorization'));
         $token = $authorization[1] ?? '';
-
         if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
             return $this->responseFactory->createResponse()
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(401, 'Unauthorized');
         }
-
-        // Append valid token
         $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
         $request = $request->withAttribute('token', $parsedToken);
-
-        // Append the user id as request attribute
-        $request = $request->withAttribute('client_id', $parsedToken->getClaim('client_id'));
 
         return $handler->handle($request);
     }
