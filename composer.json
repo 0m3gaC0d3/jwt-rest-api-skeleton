@@ -1,8 +1,8 @@
 {
-    "name": "omegacode/simple-jwt-secured-api-skeleton",
+    "name": "omegacode/jwt-secured-api-skeleton",
     "type": "project",
     "description": "",
-    "homepage": "https://github.com/0m3gaC0d3/jwt-rest-api-skeleton",
+    "homepage": "https://github.com/0m3gaC0d3/jwt-secured-api-skeleton",
     "license": "MIT",
     "require": {
         "ext-json": "*",

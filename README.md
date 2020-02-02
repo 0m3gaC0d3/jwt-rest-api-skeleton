@@ -13,7 +13,7 @@ The skeleton comes also bundled with [DI (dependency injection)](https://symfony
 * PHP extension ext-json
 
 ## How to install
-* run `composer create-project omegacode/simple-jwt-secured-api-skeleton`.
+* run `composer create-project omegacode/jwt-secured-api-skeleton`.
 * move `.env.dist` to `.env` and adjust the values to your needs.
 * Generate a public and a private key and move them to `keys/` (You can also adjust the path in the .env file).
 
