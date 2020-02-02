@@ -1,8 +1,9 @@
 {
     "name": "omegacode/jwt-secured-api-skeleton",
     "type": "project",
-    "description": "",
+    "description": "This is a simple jwt based API skeleton to kick start your API development.",
     "homepage": "https://github.com/0m3gaC0d3/jwt-secured-api-skeleton",
+    ""
     "license": "MIT",
     "require": {
         "ext-json": "*",
@@ -32,5 +33,10 @@
         "psr-4": {
             "App\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "php -f ./Install/build.php"
+        ]
     }
 }
