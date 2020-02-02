@@ -14,6 +14,7 @@ RUN apt-get update \
         unzip \
         netcat \
         net-tools \
+        openssl \
 	# Install PHP extensions.
 	&& docker-php-ext-install -j$(nproc) \
         gd \

@@ -1,2 +1,3 @@
 controllers:
   - App\Controller\StandardController
+  - App\Controller\AuthController

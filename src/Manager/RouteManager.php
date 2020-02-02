@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Manager;
 
-use App\Controller\ControllerInterface;
-use App\Controller\StandardController;
-use Doctrine\Common\Annotations\AnnotationReader;
-use OmegaCode\DebuggerUtility;
+use App\Middleware\JsonWebTokenMiddleware;
+use App\Service\ControllerAnnotationService;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Service\ConfigurationFileService;
-use App\Service\DatabaseService;
 use Slim\App as API;
+use Slim\Interfaces\RouteInterface;
 
 class RouteManager
 {
@@ -24,80 +23,54 @@ class RouteManager
         "patch",
     ];
 
-    private const REQUIRED_PROPERTIES = ['controller', 'route', 'method', 'action'];
-
     private API $api;
 
     private ConfigurationFileService $configurationFileService;
 
+    private ContainerInterface $container;
 
-    public function __construct(
-        API $api,
-        ConfigurationFileService $configurationFileService
-
-    ) {
+    public function __construct(API $api, ConfigurationFileService $configurationFileService)
+    {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
+        $this->container = $api->getContainer();
     }
 
     public function registerRoutes()
     {
-
-        $controllerConfiguration = $this->getControllerConfigurations();
-
-        $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
+        /** @var ControllerAnnotationService $controllerAnnotationService */
+        $controllerAnnotationService = $this->container->get(ControllerAnnotationService::class);
+        $controllerConfiguration = $controllerAnnotationService->getConfiguration();
         foreach ($controllerConfiguration as $configuration) {
             $class = trim($configuration['controller']);
             $route = trim($configuration['route']);
-            $method = trim($configuration['method']);
+            $method = strtolower(trim($configuration['method']));
             $action = trim($configuration['action']);
+            $protected = (bool)$configuration['protected'];
             $controller = new $class;
-            $this->handleRequest($method, $route, $controller, $action);
+            $this->handleRequest($method, $route, $controller, $action, $protected);
         }
     }
 
-    private function handleRequest(string $method, string $route, object $controller, string $action)
+    private function handleRequest(string $method, string $route, object $controller, string $action, bool $protected)
     {
         if (!in_array($method, self::ALLOWED_METHODS)) {
             throw new \InvalidArgumentException(
                 "The method $method is not allowed. Allowed methods are: ".implode(', ', self::ALLOWED_METHODS)
             );
         }
-        $this->api->$method(
+        /** @var RouteInterface $router */
+        $router = $this->api->$method(
             $route,
             function (Request $request, Response $response, array $args) use ($controller, $action) {
                 return $controller->$action($this, $request, $response, $args);
             }
         );
-    }
-
-    private function getControllerConfigurations()
-    {
-        // todo refactor me
-        $configuration = [];
-        $reader = new AnnotationReader();
-        $controllerClasses = $this->configurationFileService->load('controllers.yaml')['controllers'];
-        foreach ($controllerClasses as $controllerClass ) {
-            $class = new \ReflectionClass($controllerClass);
-            $methods = $class->getMethods();
-            /** @var \ReflectionMethod $method */
-            foreach ($methods as $method) {
-                $methodAnnotations = $reader->getMethodAnnotations($method);
-                foreach ($methodAnnotations as $annotation) {
-                    if ($annotation instanceof \App\Annotation\ControllerAnnotation) {
-                        if (isset($configuration[$class->getName().'::'.$method->getName()])) {
-                            continue;
-                        }
-                        $configuration[$class->getName().'::'.$method->getName()] = [
-                            "controller" => $class->getName(),
-                            "method" => $annotation->method,
-                            "route" => $annotation->route,
-                            "action" => $method->getName()
-                        ];
-                    }
-                }
-            }
+        if ($protected) {
+            $router->addMiddleware(new JsonWebTokenMiddleware(
+                $this->api->getContainer()->get('api.auth.jwt'),
+                $this->api->getResponseFactory()
+            ));
         }
-        return $configuration;
     }
 }

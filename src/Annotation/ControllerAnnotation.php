@@ -21,4 +21,9 @@ final class ControllerAnnotation
      * @Required
      */
     public $method = '';
+
+    /**
+     * @var bool
+     */
+    public $protected = false;
 }
