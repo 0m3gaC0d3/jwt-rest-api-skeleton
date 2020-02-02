@@ -8,4 +8,5 @@ services:
     public: true
   App\:
     resource: '../src/*'
-    exclude: '../src/{Manager,Controller,Config,Auth,Middleware,Factory,Kernel.php}'
+    exclude: '../src/{Manager,Config,Middleware,Factory,Kernel.php}'
+

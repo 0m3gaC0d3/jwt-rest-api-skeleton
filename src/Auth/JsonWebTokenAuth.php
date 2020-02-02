@@ -25,16 +25,17 @@ final class JsonWebTokenAuth
 
     private Sha256 $signer;
 
-    public function __construct(
-        string $issuer,
-        int $lifetime,
-        string $privateKey,
-        string $publicKey
-    ) {
-        $this->issuer = $issuer;
-        $this->lifetime = $lifetime;
-        $this->privateKey = $privateKey;
-        $this->publicKey = $publicKey;
+    public function __construct()
+    {
+        $this->initialize();
+    }
+
+    private function initialize()
+    {
+        $this->issuer = $_ENV['JWT_ISSUER'];
+        $this->lifetime = (int) $_ENV['JWT_LIFETIME'];
+        $this->privateKey = file_get_contents(__DIR__.'/../../'.$_ENV['PRIVATE_KEY']);
+        $this->publicKey = file_get_contents(__DIR__.'/../../'.$_ENV['PUBLIC_KEY']);
         $this->signer = new Sha256();
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Manager;
 
+use App\Auth\JsonWebTokenAuth;
 use App\Middleware\JsonWebTokenMiddleware;
 use App\Service\ControllerAnnotationService;
 use Psr\Container\ContainerInterface;
@@ -47,7 +48,7 @@ class RouteManager
             $method = strtolower(trim($configuration['method']));
             $action = trim($configuration['action']);
             $protected = (bool)$configuration['protected'];
-            $controller = new $class;
+            $controller = $this->container->get($class);
             $this->handleRequest($method, $route, $controller, $action, $protected);
         }
     }
@@ -63,12 +64,12 @@ class RouteManager
         $router = $this->api->$method(
             $route,
             function (Request $request, Response $response, array $args) use ($controller, $action) {
-                return $controller->$action($this, $request, $response, $args);
+                return $controller->$action($request, $response, $args);
             }
         );
         if ($protected) {
             $router->addMiddleware(new JsonWebTokenMiddleware(
-                $this->api->getContainer()->get('api.auth.jwt'),
+                $this->api->getContainer()->get(JsonWebTokenAuth::class),
                 $this->api->getResponseFactory()
             ));
         }

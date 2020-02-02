@@ -43,7 +43,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Annotation\ControllerAnnotation;
@@ -53,7 +52,7 @@ class MyController
     /**
      * @ControllerAnnotation(route="/", method="get", protected=true)
      */
-    public function someAction(Container $container, Request $request, Response $response, array $args): Response
+    public function someAction(Request $request, Response $response, array $args): Response
     {
         $response->getBody()->write("Hello world");
 

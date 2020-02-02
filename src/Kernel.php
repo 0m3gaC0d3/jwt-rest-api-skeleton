@@ -32,26 +32,19 @@ class Kernel
             $routeManager->registerRoutes();
             $api->run();
         } catch (Exception $exception) {
-            // TODO: log error
-            $this->emitServerErrorResponse($api);
+            if ((bool)$_ENV['SHOW_ERRORS']) {
+                throw $exception;
+            } else {
+                // TODO: log error
+                $this->emitServerErrorResponse($api);
+            }
         }
     }
 
     private function init()
     {
         $this->container = ContainerFactory::build();
-        $this->addAuthService($this->container);
         $this->container->compile();
-    }
-
-    private function addAuthService(ContainerInterface $container)
-    {
-        $container->set('api.auth.jwt', new \App\Auth\JsonWebTokenAuth(
-            $_ENV['JWT_ISSUER'],
-            (int)$_ENV['JWT_LIFETIME'],
-            file_get_contents(__DIR__.'/../'.$_ENV['PRIVATE_KEY']),
-            file_get_contents(__DIR__.'/../'.$_ENV['PUBLIC_KEY'])
-        ));
     }
 
     private function emitServerErrorResponse(API $api)
