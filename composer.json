@@ -22,7 +22,11 @@
         "ramsey/uuid": "^3.9"
     },
     "require-dev": {
-        "omegacode/t3-debugger-utility-standalone": "^1.0"
+        "phpunit/phpunit": "^8.5",
+        "omegacode/t3-debugger-utility-standalone": "^1.0",
+        "squizlabs/php_codesniffer": "^3.5",
+        "phpstan/phpstan": "0.12.*",
+        "phpmd/phpmd": "^2.8"
     },
     "autoload": {
         "psr-4": {
@@ -33,5 +37,26 @@
         "psr-4": {
             "App\\Tests\\": "tests/"
         }
+    },
+    "config": {
+        "bin-dir": "bin",
+        "platform": {
+            "php": "7.4"
+        },
+        "process-timeout": 0
+    },
+    "scripts": {
+        "test": [
+            "./.ci/scripts/ciRunner.sh -s unit"
+        ],
+        "lint": [
+            "./.ci/scripts/ciRunner.sh -s lint"
+        ],
+        "build": [
+            "./.ci/scripts/ciRunner.sh -s build"
+        ],
+        "quality": [
+            "./.ci/scripts/ciRunner.sh -s quality"
+        ]
     }
 }
