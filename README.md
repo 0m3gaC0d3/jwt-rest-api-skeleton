@@ -1,3 +1,5 @@
+![alt text](https://travis-ci.org/0m3gaC0d3/jwt-secured-api-skeleton.svg?branch=master "Build status")
+
 # Simple JWT secured API skeleton
 This is a simple jwt based API skeleton to kick start your API development.
 It is based on the PHP micro framework [Slim 4](http://www.slimframework.com/)

@@ -7,3 +7,5 @@ keys/*
 bin/*
 !bin/.gitkeep
 .phpunit.result.cache
+.database/
+.idea/
