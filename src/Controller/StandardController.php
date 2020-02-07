@@ -23,12 +23,11 @@ class StandardController
      */
     public function getAction(Request $request, Response $response, array $args): Response
     {
-        $configuration = $this->controllerAnnotationService->getConfiguration();
         ob_start();
-        include __DIR__.'/../../template/welcome.php';
+        include __DIR__ . '/../../template/welcome.php';
         $content = ob_get_contents();
         ob_end_clean();
-        $response->getBody()->write($content);
+        $response->getBody()->write((string) $content);
 
         return $response;
     }

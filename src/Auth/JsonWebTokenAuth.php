@@ -30,12 +30,12 @@ final class JsonWebTokenAuth
         $this->initialize();
     }
 
-    private function initialize()
+    private function initialize(): void
     {
         $this->issuer = $_ENV['JWT_ISSUER'];
-        $this->lifetime = (int) $_ENV['JWT_LIFETIME'];
-        $this->privateKey = file_get_contents(__DIR__.'/../../'.$_ENV['PRIVATE_KEY']);
-        $this->publicKey = file_get_contents(__DIR__.'/../../'.$_ENV['PUBLIC_KEY']);
+        $this->lifetime = (int)$_ENV['JWT_LIFETIME'];
+        $this->privateKey = (string)file_get_contents(__DIR__ . '/../../' . $_ENV['PRIVATE_KEY']);
+        $this->publicKey = (string)file_get_contents(__DIR__ . '/../../' . $_ENV['PUBLIC_KEY']);
         $this->signer = new Sha256();
     }
 
@@ -44,6 +44,9 @@ final class JsonWebTokenAuth
         return $this->lifetime;
     }
 
+    /**
+     * @param array<mixed<string>> $claims
+     */
     public function createJwt(array $claims): string
     {
         $issuedAt = Chronos::now()->getTimestamp();

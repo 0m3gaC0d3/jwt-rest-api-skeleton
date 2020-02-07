@@ -25,7 +25,7 @@ class AuthController
     /**
      * @ControllerAnnotation(route="/api/tokens", method="post", protected=false)
      */
-    public function newTokenAction(Request $request, Response $response, array $args): Response
+    public function newTokenAction(Request $request, Response $response): Response
     {
         if (!$this->consumerValidationService->isValid($request)) {
             return $response->withHeader('Content-Type', 'application/json')->withStatus(401, 'Unauthorized');
@@ -35,7 +35,7 @@ class AuthController
             'token_type' => 'Bearer',
             'expires_in' => $this->auth->getLifetime(),
         ];
-        $response->getBody()->write(json_encode($result));
+        $response->getBody()->write((string) json_encode($result));
         $response = $response->withStatus(201)->withHeader('Content-type', 'application/json');
 
         return $response;

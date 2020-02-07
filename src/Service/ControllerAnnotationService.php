@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Service;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use ReflectionClass;
+use ReflectionMethod;
+use App\Annotation\ControllerAnnotation;
 
 class ControllerAnnotationService
 {
@@ -23,28 +26,27 @@ class ControllerAnnotationService
         $configuration = [];
         $controllerClasses = $this->configurationFileService->load('controllers.yaml')['controllers'];
         foreach ($controllerClasses as $controllerClass) {
-            $reflectionClass = new \ReflectionClass($controllerClass);
+            $reflectionClass = new ReflectionClass($controllerClass);
             $reflectionMethods = $reflectionClass->getMethods();
             foreach ($reflectionMethods as $reflectionMethod) {
                 $configuration = $this->getMethodAnnotationData($reflectionMethod, $configuration);
             }
-
         }
 
         return $configuration;
     }
 
-    private function getMethodAnnotationData(\ReflectionMethod $reflectionMethod, array $configuration)
+    private function getMethodAnnotationData(ReflectionMethod $reflectionMethod, array $configuration): array
     {
         $annotations = $this->reader->getMethodAnnotations($reflectionMethod);
         foreach ($annotations as $annotation) {
-            if (!$annotation instanceof \App\Annotation\ControllerAnnotation) {
+            if (!$annotation instanceof ControllerAnnotation) {
                 continue;
             }
-            if (isset($configuration[$reflectionMethod->class.'::'.$reflectionMethod->getName()])) {
+            if (isset($configuration[$reflectionMethod->class . '::' . $reflectionMethod->getName()])) {
                 continue;
             }
-            $configuration[$reflectionMethod->class.'::'.$reflectionMethod->getName()] = [
+            $configuration[$reflectionMethod->class . '::' . $reflectionMethod->getName()] = [
                 "controller" => $reflectionMethod->class,
                 "method" => $annotation->method,
                 "route" => $annotation->route,

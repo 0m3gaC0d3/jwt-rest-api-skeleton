@@ -1,3 +1,9 @@
+<?php
+/**
+ * @see \App\Controller\StandardController::getAction
+ */
+$configuration = $this->controllerAnnotationService->getConfiguration();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,10 +31,10 @@
                         <tbody>
                         <?php
                         foreach ($configuration as $conf) {
-                            echo "<tr>";
-                            echo "<td>".strtoupper($conf['method'])."</td>";
-                            echo "<td>".rtrim($_ENV['JWT_ISSUER'], '/').$conf['route']."</td>";
-                            echo "</tr>";
+                            echo '<tr>';
+                            echo '<td>' . strtoupper($conf['method']) . '</td>';
+                            echo '<td>' . rtrim($_ENV['JWT_ISSUER'], '/') . $conf['route'] . '</td>';
+                            echo '</tr>';
                         }
                         ?>
                         </tbody>

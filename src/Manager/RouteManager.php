@@ -13,6 +13,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Service\ConfigurationFileService;
 use Slim\App as API;
 use Slim\Interfaces\RouteInterface;
+use InvalidArgumentException;
 
 class RouteManager
 {
@@ -28,36 +29,46 @@ class RouteManager
 
     private ConfigurationFileService $configurationFileService;
 
-    private ContainerInterface $container;
+    private ControllerAnnotationService $controllerAnnotationService;
 
-    public function __construct(API $api, ConfigurationFileService $configurationFileService)
-    {
+    private JsonWebTokenAuth $auth;
+
+    public function __construct(
+        API $api,
+        ConfigurationFileService $configurationFileService,
+        ControllerAnnotationService $controllerAnnotationService,
+        JsonWebTokenAuth $auth
+    ) {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
-        $this->container = $api->getContainer();
+        $this->controllerAnnotationService = $controllerAnnotationService;
+        $this->auth = $auth;
     }
 
-    public function registerRoutes()
+    public function registerRoutes(ContainerInterface $container): void
     {
-        /** @var ControllerAnnotationService $controllerAnnotationService */
-        $controllerAnnotationService = $this->container->get(ControllerAnnotationService::class);
-        $controllerConfiguration = $controllerAnnotationService->getConfiguration();
+        $controllerConfiguration = $this->controllerAnnotationService->getConfiguration();
         foreach ($controllerConfiguration as $configuration) {
             $class = trim($configuration['controller']);
             $route = trim($configuration['route']);
             $method = strtolower(trim($configuration['method']));
             $action = trim($configuration['action']);
             $protected = (bool)$configuration['protected'];
-            $controller = $this->container->get($class);
+            $controller = $container->get($class);
             $this->handleRequest($method, $route, $controller, $action, $protected);
         }
     }
 
-    private function handleRequest(string $method, string $route, object $controller, string $action, bool $protected)
-    {
+    private function handleRequest(
+        string $method,
+        string $route,
+        object $controller,
+        string $action,
+        bool $protected
+    ): void {
         if (!in_array($method, self::ALLOWED_METHODS)) {
-            throw new \InvalidArgumentException(
-                "The method $method is not allowed. Allowed methods are: ".implode(', ', self::ALLOWED_METHODS)
+            throw new InvalidArgumentException(
+                "The method $method is not allowed. Allowed methods are: " . implode(', ', self::ALLOWED_METHODS)
             );
         }
         /** @var RouteInterface $router */
@@ -68,10 +79,7 @@ class RouteManager
             }
         );
         if ($protected) {
-            $router->addMiddleware(new JsonWebTokenMiddleware(
-                $this->api->getContainer()->get(JsonWebTokenAuth::class),
-                $this->api->getResponseFactory()
-            ));
+            $router->addMiddleware(new JsonWebTokenMiddleware($this->auth, $this->api->getResponseFactory()));
         }
     }
 }

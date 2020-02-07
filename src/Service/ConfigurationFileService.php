@@ -12,9 +12,12 @@ use Symfony\Component\Config\Loader\LoaderResolver;
 class ConfigurationFileService
 {
     private const CONFIGURATION_DIRECTORIES = [
-        __DIR__.'/../../conf',
+        __DIR__ . '/../../conf',
     ];
 
+    /**
+     * @return mixed
+     */
     public function load(string $configurationFile)
     {
         $fileLocator = new FileLocator(self::CONFIGURATION_DIRECTORIES);
