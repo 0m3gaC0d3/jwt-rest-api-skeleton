@@ -4,22 +4,33 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Auth\JsonWebTokenAuth;
 use App\Factory\ContainerFactory;
 use App\Manager\RouteManager;
 use App\Service\ConfigurationFileService;
+use App\Service\ControllerAnnotationService;
 use Slim\Factory\AppFactory;
 use Slim\ResponseEmitter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Slim\App as API;
 use Exception;
 
+/**
+ * TODO refactor this. SRP!
+ */
 class Kernel
 {
-    protected ContainerInterface $container;
+    protected ContainerBuilder $container;
 
     public function __construct()
     {
         $this->init();
+    }
+
+    private function init(): void
+    {
+        $this->container = ContainerFactory::build();
+        $this->container->compile();
     }
 
     public function run(): void
@@ -28,26 +39,24 @@ class Kernel
         $api = AppFactory::create();
         try {
             $api->addBodyParsingMiddleware();
-            $routeManager = new RouteManager($api, $this->container->get(ConfigurationFileService::class));
-            $routeManager->registerRoutes();
+            /** @var ConfigurationFileService $configurationFileService */
+            $configurationFileService = $this->container->get(ConfigurationFileService::class);
+            /** @var JsonWebTokenAuth $auth */
+            $auth = $this->container->get(JsonWebTokenAuth::class);
+            /** @var ControllerAnnotationService $controllerAnnotationService */
+            $controllerAnnotationService = $this->container->get(ControllerAnnotationService::class);
+            $routeManager = new RouteManager($api, $configurationFileService, $controllerAnnotationService, $auth);
+            $routeManager->registerRoutes($this->container);
             $api->run();
         } catch (Exception $exception) {
             if ((bool)$_ENV['SHOW_ERRORS']) {
                 throw $exception;
-            } else {
-                // TODO: log error
-                $this->emitServerErrorResponse($api);
             }
+            $this->emitServerErrorResponse($api);
         }
     }
 
-    private function init()
-    {
-        $this->container = ContainerFactory::build();
-        $this->container->compile();
-    }
-
-    private function emitServerErrorResponse(API $api)
+    private function emitServerErrorResponse(API $api): void
     {
         $response = $api->getResponseFactory()->createResponse()
             ->withHeader('Content-Type', 'application/json')

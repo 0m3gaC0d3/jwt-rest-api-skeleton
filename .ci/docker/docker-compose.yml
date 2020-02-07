@@ -49,7 +49,7 @@ services:
                 echo \"Running phpmd...\";
                 bin/phpmd src text phpmd.xml;
                 echo \"Running phpstan...\";
-                bin/phpstan analyse --autoload-file=vendor/autoload.php -l max src
+                bin/phpstan analyse -c phpstan.neon --autoload-file=vendor/autoload.php -l max src
             "
     #======================================================
     # Unit tests

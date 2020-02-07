@@ -9,7 +9,9 @@
         <exclude name="StaticAccess"/>
         <exclude name="BooleanArgumentFlag"/>
     </rule>
-    <rule ref="rulesets/unusedcode.xml"/>
+    <rule ref="rulesets/unusedcode.xml">
+        <exclude name="UnusedFormalParameter"/>
+    </rule>
     <rule ref="rulesets/codesize.xml">
         <exclude name="TooManyFields"/>
         <exclude name="TooManyMethods"/>
