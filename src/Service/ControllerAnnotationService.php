@@ -26,6 +26,9 @@ class ControllerAnnotationService
         $configuration = [];
         $controllerClasses = $this->configurationFileService->load('controllers.yaml')['controllers'];
         foreach ($controllerClasses as $controllerClass) {
+            if (!class_exists($controllerClass)) {
+                throw new \Exception("Controller $controllerClass does not exist");
+            }
             $reflectionClass = new ReflectionClass($controllerClass);
             $reflectionMethods = $reflectionClass->getMethods();
             foreach ($reflectionMethods as $reflectionMethod) {

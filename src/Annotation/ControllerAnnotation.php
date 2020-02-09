@@ -14,16 +14,16 @@ final class ControllerAnnotation
      * @var string
      * @Required
      */
-    public $route = '';
+    public string $route = '';
 
     /**
      * @var string
      * @Required
      */
-    public $method = '';
+    public string $method = '';
 
     /**
      * @var bool
      */
-    public $protected = false;
+    public bool $protected = false;
 }

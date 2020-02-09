@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Manager;
+namespace App;
 
 use App\Auth\JsonWebTokenAuth;
 use App\Middleware\JsonWebTokenMiddleware;
@@ -15,7 +15,7 @@ use Slim\App as API;
 use Slim\Interfaces\RouteInterface;
 use InvalidArgumentException;
 
-class RouteManager
+class Router
 {
     private const ALLOWED_METHODS = [
         "get",
@@ -54,6 +54,9 @@ class RouteManager
             $method = strtolower(trim($configuration['method']));
             $action = trim($configuration['action']);
             $protected = (bool)$configuration['protected'];
+            if (!$container->has($class)) {
+                throw new \Exception("Could not find controller service with id: $class");
+            }
             $controller = $container->get($class);
             $this->handleRequest($method, $route, $controller, $action, $protected);
         }
@@ -75,6 +78,12 @@ class RouteManager
         $router = $this->api->$method(
             $route,
             function (Request $request, Response $response, array $args) use ($controller, $action) {
+                if (!is_callable([$controller, $action])) {
+                    throw new \Exception(
+                        "Can not call ".get_class($controller).'::'.$action.'. Method must be public.'
+                    );
+                }
+
                 return $controller->$action($request, $response, $args);
             }
         );
