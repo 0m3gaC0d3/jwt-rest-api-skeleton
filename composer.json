@@ -25,6 +25,7 @@
         "phpunit/phpunit": "^8.5",
         "omegacode/t3-debugger-utility-standalone": "^1.0",
         "squizlabs/php_codesniffer": "^3.5",
+        "friendsofphp/php-cs-fixer": "^2.16",
         "phpstan/phpstan": "0.12.*",
         "phpmd/phpmd": "^2.8"
     },
