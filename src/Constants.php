@@ -8,4 +8,5 @@ class Constants
 {
     public const APP_ROOT_PATH = __DIR__.'/../';
     public const WEB_ROOT_PATH = self::APP_ROOT_PATH.'/public/';
+    public const CONF_ROOT_PATH = self::APP_ROOT_PATH.'/conf/';
 }

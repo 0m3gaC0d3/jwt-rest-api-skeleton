@@ -21,7 +21,7 @@ class StandardController
     /**
      * @ControllerAnnotation(route="/", method="get", protected=false)
      */
-    private function getAction(Request $request, Response $response, array $args): Response
+    public function getAction(Request $request, Response $response): Response
     {
         ob_start();
         include __DIR__ . '/../../template/welcome.php';
