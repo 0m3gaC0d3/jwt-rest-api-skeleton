@@ -1,64 +1,85 @@
 <?php
 
+/**
+ * MIT License
+ *
+ * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 declare(strict_types=1);
 
 namespace App;
 
 use App\Auth\JsonWebTokenAuth;
 use App\Factory\ContainerFactory;
-use App\Manager\RouteManager;
 use App\Service\ConfigurationFileService;
 use App\Service\ControllerAnnotationService;
+use Exception;
+use Slim\App as API;
 use Slim\Factory\AppFactory;
 use Slim\ResponseEmitter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Slim\App as API;
-use Exception;
 
-/**
- * TODO refactor this. SRP!
- */
 class Kernel
 {
     protected ContainerBuilder $container;
+
+    protected API $api;
 
     public function __construct()
     {
         $this->init();
     }
 
-    private function init(): void
-    {
-        $this->container = ContainerFactory::build();
-        $this->container->compile();
-    }
-
     public function run(): void
     {
-        AppFactory::setContainer($this->container);
-        $api = AppFactory::create();
         try {
-            $api->addBodyParsingMiddleware();
             /** @var ConfigurationFileService $configurationFileService */
             $configurationFileService = $this->container->get(ConfigurationFileService::class);
             /** @var JsonWebTokenAuth $auth */
             $auth = $this->container->get(JsonWebTokenAuth::class);
             /** @var ControllerAnnotationService $controllerAnnotationService */
             $controllerAnnotationService = $this->container->get(ControllerAnnotationService::class);
-            $routeManager = new RouteManager($api, $configurationFileService, $controllerAnnotationService, $auth);
-            $routeManager->registerRoutes($this->container);
-            $api->run();
+            $router = new Router($this->api, $configurationFileService, $controllerAnnotationService, $auth);
+            $router->registerRoutes($this->container);
+            $this->api->run();
         } catch (Exception $exception) {
-            if ((bool)$_ENV['SHOW_ERRORS']) {
+            if ((bool) $_ENV['SHOW_ERRORS']) {
                 throw $exception;
             }
-            $this->emitServerErrorResponse($api);
+            $this->emitServerErrorResponse();
         }
     }
 
-    private function emitServerErrorResponse(API $api): void
+    private function init(): void
     {
-        $response = $api->getResponseFactory()->createResponse()
+        $this->container = ContainerFactory::build();
+        $this->container->compile(true);
+        $this->api = AppFactory::create();
+        $this->api->addBodyParsingMiddleware();
+    }
+
+    private function emitServerErrorResponse(): void
+    {
+        $response = $this->api->getResponseFactory()->createResponse()
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(500, 'Server Error');
         $responseEmitter = new ResponseEmitter();

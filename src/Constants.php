@@ -26,21 +26,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace App;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
-
-class DatabaseService
+class Constants
 {
-    public function getConnection(): Connection
-    {
-        return DriverManager::getConnection([
-            'dbname' => $_ENV['DATABASE'],
-            'user' => $_ENV['USER'],
-            'password' => $_ENV['PASSWORD'],
-            'host' => $_ENV['HOST'],
-            'driver' => $_ENV['DRIVER'],
-        ]);
-    }
+    public const APP_ROOT_PATH = __DIR__ . '/../';
+    public const WEB_ROOT_PATH = self::APP_ROOT_PATH . '/public/';
+    public const CONF_ROOT_PATH = self::APP_ROOT_PATH . '/conf/';
 }

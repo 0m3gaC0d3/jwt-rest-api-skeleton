@@ -30,9 +30,7 @@ services:
         working_dir: ${ROOT_DIR}
         command: >
             /bin/sh -c "
-              echo \"Currently not working\"
-            #   php -v | grep '^PHP';
-            #   find . -name \\*.php ! -path "./.Build/\\*" -print0 | xargs -0 -n1 -P4 php -n -l >/dev/null
+                if find ./src/ -type f -name '*.php' -exec php -l {} \; | grep \"Parsing error\"; then exit 1; fi
             "
     #======================================================
     # Quality
@@ -46,6 +44,8 @@ services:
             /bin/sh -c "
                 echo \"Running phpcs...\";
                 bin/phpcs --error-severity=1 --warning-severity=8 --extensions=php src;
+                echo \"Running php-cs-fixer...\";
+                bin/php-cs-fixer fix --dry-run --diff
                 echo \"Running phpmd...\";
                 bin/phpmd src text phpmd.xml;
                 echo \"Running phpstan...\";

@@ -1,6 +1,3 @@
-parameters:
-  #...
-
 services:
   _defaults:
     autowire: true
@@ -8,5 +5,11 @@ services:
     public: true
   App\:
     resource: '../src/*'
-    exclude: '../src/{Manager,Config,Middleware,Factory,Kernel.php}'
+    exclude: '../src/{Config,Middleware,Factory,Kernel.php,Router.php,Constants.php}'
 
+  App\Auth\JsonWebTokenAuth:
+    arguments:
+      $issuer: '%env(string:JWT_ISSUER)%'
+      $lifetime: '%env(int:JWT_LIFETIME)%'
+      $privateKeyPath: '%env(string:PRIVATE_KEY_PATH)%'
+      $publicKeyPath: '%env(string:PUBLIC_KEY_PATH)%'

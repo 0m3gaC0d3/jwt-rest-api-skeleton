@@ -1,9 +1,34 @@
 <?php
 
+/**
+ * MIT License
+ *
+ * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Constants;
 use Cake\Chronos\Chronos;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
@@ -12,6 +37,7 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 final class JsonWebTokenAuth
 {
@@ -25,18 +51,12 @@ final class JsonWebTokenAuth
 
     private Sha256 $signer;
 
-    public function __construct()
+    public function __construct(string $issuer, int $lifetime, string $privateKeyPath, string $publicKeyPath)
     {
-        $this->initialize();
-    }
-
-    private function initialize(): void
-    {
-        $this->issuer = $_ENV['JWT_ISSUER'];
-        $this->lifetime = (int)$_ENV['JWT_LIFETIME'];
-        $this->privateKey = (string)file_get_contents(__DIR__ . '/../../' . $_ENV['PRIVATE_KEY']);
-        $this->publicKey = (string)file_get_contents(__DIR__ . '/../../' . $_ENV['PUBLIC_KEY']);
+        $this->issuer = $issuer;
+        $this->lifetime = $lifetime;
         $this->signer = new Sha256();
+        $this->getKeyFileContent($privateKeyPath, $publicKeyPath);
     }
 
     public function getLifetime(): int
@@ -44,9 +64,6 @@ final class JsonWebTokenAuth
         return $this->lifetime;
     }
 
-    /**
-     * @param array<mixed<string>> $claims
-     */
     public function createJwt(array $claims): string
     {
         $issuedAt = Chronos::now()->getTimestamp();
@@ -59,7 +76,7 @@ final class JsonWebTokenAuth
             $builder->withClaim($name, $value);
         }
 
-        return (string)$builder->getToken($this->signer, new Key($this->privateKey));
+        return (string) $builder->getToken($this->signer, new Key($this->privateKey));
     }
 
     public function createParsedToken(string $token): Token
@@ -80,5 +97,16 @@ final class JsonWebTokenAuth
         $data->setId($token->getClaim('jti'));
 
         return $token->validate($data);
+    }
+
+    private function getKeyFileContent(string $privateKeyPath, string $publicKeyPath): void
+    {
+        $privateKeyFilePath = Constants::APP_ROOT_PATH . $privateKeyPath;
+        $publicKeyFilePath = Constants::APP_ROOT_PATH . $publicKeyPath;
+        if (!file_exists($privateKeyFilePath) || !file_exists($publicKeyFilePath)) {
+            throw new FileNotFoundException('Could not load key files');
+        }
+        $this->privateKey = (string) file_get_contents($privateKeyFilePath);
+        $this->publicKey = (string) file_get_contents($publicKeyFilePath);
     }
 }
