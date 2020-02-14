@@ -26,26 +26,37 @@
 
 declare(strict_types=1);
 
-namespace App\Factory;
+namespace OmegCaode\JwtSecuredApiCore\Factory;
 
+use OmegCaode\JwtSecuredApiCore\Constants;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 final class ContainerFactory
 {
-    private const CONFIGURATION_FILE_PATH = __DIR__ . '/../../conf';
     private const CONFIGURATION_FILE_NAME = 'services.yaml';
 
     public static function build(): ContainerBuilder
     {
         $containerBuilder = new ContainerBuilder();
-        $loader = new YamlFileLoader(
-            $containerBuilder,
-            new FileLocator(self::CONFIGURATION_FILE_PATH)
-        );
-        $loader->load(self::CONFIGURATION_FILE_NAME);
+        foreach (static::getConfigurationFileDirectories() as $resource) {
+            $loader = new YamlFileLoader($containerBuilder, new FileLocator($resource));
+            $loader->load(self::CONFIGURATION_FILE_NAME);
+        }
 
         return $containerBuilder;
+    }
+
+    private static function getConfigurationFileDirectories(): array
+    {
+        if (!defined('APP_ROOT_PATH')) {
+            throw new \Exception('Constant APP_ROOT_PATH is not defined but required');
+        }
+
+        return [
+            realpath(Constants::CONF_ROOT_PATH),
+            realpath(APP_ROOT_PATH . 'conf/'),
+        ];
     }
 }

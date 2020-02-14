@@ -1,9 +1,14 @@
 {
-    "name": "omegacode/jwt-secured-api-skeleton",
-    "type": "project",
-    "description": "This is a simple jwt based API skeleton to kick start your API development.",
-    "homepage": "https://github.com/0m3gaC0d3/jwt-secured-api-skeleton",
+    "name": "omegacode/jwt-secured-api-core",
+    "description": "This is a the simple JWT based API core package.",
+    "homepage": "https://github.com/0m3gaC0d3/jwt-secured-api-core",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Wolf Utz",
+            "email": "wpu@hotmail.de"
+        }
+    ],
     "require": {
         "ext-json": "*",
         "php": ">=7.4",
@@ -31,12 +36,12 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "OmegaCode\\JwtSecuredApiCore\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "OmegaCode\\JwtSecuredApiCore\\Tests\\": "tests/"
         }
     },
     "config": {

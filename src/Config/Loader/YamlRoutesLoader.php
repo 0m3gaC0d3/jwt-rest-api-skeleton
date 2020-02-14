@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-namespace App\Config\Loader;
+namespace OmegCaode\JwtSecuredApiCore\Config\Loader;
 
 use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Filesystem\Exception\IOException;
