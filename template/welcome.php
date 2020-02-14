@@ -1,7 +1,4 @@
 <?php
-/**
- * @see \App\Controller\StandardController::getAction
- */
 $configuration = $this->controllerAnnotationService->getConfiguration();
 ?>
 <!DOCTYPE html>
