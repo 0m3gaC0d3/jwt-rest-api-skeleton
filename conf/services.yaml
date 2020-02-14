@@ -3,11 +3,11 @@ services:
     autowire: true
     autoconfigure: true
     public: true
-  App\:
+  OmegaCode\JwtSecuredApiCore\:
     resource: '../src/*'
     exclude: '../src/{Config,Middleware,Factory,Kernel.php,Router.php,Constants.php}'
 
-  App\Auth\JsonWebTokenAuth:
+  OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth:
     arguments:
       $issuer: '%env(string:JWT_ISSUER)%'
       $lifetime: '%env(int:JWT_LIFETIME)%'
