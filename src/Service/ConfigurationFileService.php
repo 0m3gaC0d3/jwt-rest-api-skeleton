@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
+use Exception;
 use OmegaCode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
 use OmegaCode\JwtSecuredApiCore\Constants;
 use Symfony\Component\Config\FileLocator;
@@ -39,7 +40,7 @@ class ConfigurationFileService
     public function load(string $configurationFile): array
     {
         $fileLocator = new FileLocator($this->getConfigurationFileDirectories());
-        $resources = $fileLocator->locate($configurationFile, null, false);
+        $resources = (array) $fileLocator->locate($configurationFile, null, false);
         $loaderResolver = new LoaderResolver([new YamlRoutesLoader($fileLocator)]);
         $delegatingLoader = new DelegatingLoader($loaderResolver);
         $result = [];
@@ -53,7 +54,7 @@ class ConfigurationFileService
     private function getConfigurationFileDirectories(): array
     {
         if (!defined('APP_ROOT_PATH')) {
-            throw new \Exception('Constant APP_ROOT_PATH is not defined but required');
+            throw new Exception('Constant APP_ROOT_PATH is not defined but required');
         }
 
         return [

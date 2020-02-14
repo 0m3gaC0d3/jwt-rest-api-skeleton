@@ -28,9 +28,9 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use OmegaCode\JwtSecuredApiCore\Annotation\ControllerAnnotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Exception;
+use OmegaCode\JwtSecuredApiCore\Annotation\ControllerAnnotation;
 use ReflectionClass;
 use ReflectionMethod;
 

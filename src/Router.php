@@ -28,12 +28,12 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
+use Exception;
+use InvalidArgumentException;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
-use Exception;
-use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

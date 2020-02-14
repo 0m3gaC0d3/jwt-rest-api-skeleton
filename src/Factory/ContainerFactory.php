@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Factory;
 
+use Exception;
 use OmegaCode\JwtSecuredApiCore\Constants;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -51,7 +52,7 @@ final class ContainerFactory
     private static function getConfigurationFileDirectories(): array
     {
         if (!defined('APP_ROOT_PATH')) {
-            throw new \Exception('Constant APP_ROOT_PATH is not defined but required');
+            throw new Exception('Constant APP_ROOT_PATH is not defined but required');
         }
 
         return [

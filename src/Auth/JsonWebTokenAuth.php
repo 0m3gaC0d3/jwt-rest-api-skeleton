@@ -28,15 +28,14 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Auth;
 
-use OmegaCode\JwtSecuredApiCore\Constants;
 use Cake\Chronos\Chronos;
+use Exception;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
-use OmegaCode\DebuggerUtility;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
@@ -103,7 +102,7 @@ final class JsonWebTokenAuth
     private function getKeyFileContent(string $privateKeyPath, string $publicKeyPath): void
     {
         if (!defined('APP_ROOT_PATH')) {
-            throw new \Exception("Constant APP_ROOT_PATH is not defined but required");
+            throw new Exception('Constant APP_ROOT_PATH is not defined but required');
         }
         $privateKeyFilePath = APP_ROOT_PATH . $privateKeyPath;
         $publicKeyFilePath = APP_ROOT_PATH . $publicKeyPath;
