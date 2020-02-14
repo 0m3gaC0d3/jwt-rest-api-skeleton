@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Annotation;
+namespace OmegaCode\JwtSecuredApiCore\Annotation;
 
 /**
  * @Annotation

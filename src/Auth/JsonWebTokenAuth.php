@@ -26,9 +26,9 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Auth;
+namespace OmegaCode\JwtSecuredApiCore\Auth;
 
-use OmegCaode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Constants;
 use Cake\Chronos\Chronos;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;

@@ -26,12 +26,12 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore;
+namespace OmegaCode\JwtSecuredApiCore;
 
-use OmegCaode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use OmegCaode\JwtSecuredApiCore\Factory\ContainerFactory;
-use OmegCaode\JwtSecuredApiCore\Service\ConfigurationFileService;
-use OmegCaode\JwtSecuredApiCore\Service\ControllerAnnotationService;
+use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
+use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
+use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
 use Exception;
 use Slim\App as API;
 use Slim\Factory\AppFactory;

@@ -26,10 +26,10 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Service;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use OmegCaode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
-use OmegCaode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
+use OmegaCode\JwtSecuredApiCore\Constants;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;

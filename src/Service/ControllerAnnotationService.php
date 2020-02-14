@@ -26,9 +26,9 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Service;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use OmegCaode\JwtSecuredApiCore\Annotation\ControllerAnnotation;
+use OmegaCode\JwtSecuredApiCore\Annotation\ControllerAnnotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Exception;
 use ReflectionClass;

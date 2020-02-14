@@ -26,9 +26,9 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
-use OmegCaode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

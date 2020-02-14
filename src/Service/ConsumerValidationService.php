@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Service;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 

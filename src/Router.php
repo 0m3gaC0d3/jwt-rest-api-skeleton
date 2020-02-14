@@ -26,12 +26,12 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore;
+namespace OmegaCode\JwtSecuredApiCore;
 
-use OmegCaode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use OmegCaode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
-use OmegCaode\JwtSecuredApiCore\Service\ConfigurationFileService;
-use OmegCaode\JwtSecuredApiCore\Service\ControllerAnnotationService;
+use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
+use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
+use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
 use Exception;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;

@@ -26,9 +26,9 @@
 
 declare(strict_types=1);
 
-namespace OmegCaode\JwtSecuredApiCore\Factory;
+namespace OmegaCode\JwtSecuredApiCore\Factory;
 
-use OmegCaode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Constants;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
