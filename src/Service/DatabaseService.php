@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;

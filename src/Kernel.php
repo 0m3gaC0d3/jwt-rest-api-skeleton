@@ -26,13 +26,13 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace OmegaCode\JwtSecuredApiCore;
 
-use App\Auth\JsonWebTokenAuth;
-use App\Factory\ContainerFactory;
-use App\Service\ConfigurationFileService;
-use App\Service\ControllerAnnotationService;
 use Exception;
+use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
+use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
+use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
 use Slim\App as API;
 use Slim\Factory\AppFactory;
 use Slim\ResponseEmitter;

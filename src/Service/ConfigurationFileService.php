@@ -26,30 +26,40 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use App\Config\Loader\YamlRoutesLoader;
-use App\Constants;
+use Exception;
+use OmegaCode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
+use OmegaCode\JwtSecuredApiCore\Constants;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 
 class ConfigurationFileService
 {
-    private const CONFIGURATION_DIRECTORIES = [
-        Constants::CONF_ROOT_PATH,
-    ];
-
-    /**
-     * @return mixed
-     */
-    public function load(string $configurationFile)
+    public function load(string $configurationFile): array
     {
-        $fileLocator = new FileLocator(self::CONFIGURATION_DIRECTORIES);
-        $resource = $fileLocator->locate($configurationFile, null, true);
+        $fileLocator = new FileLocator($this->getConfigurationFileDirectories());
+        $resources = (array) $fileLocator->locate($configurationFile, null, false);
         $loaderResolver = new LoaderResolver([new YamlRoutesLoader($fileLocator)]);
         $delegatingLoader = new DelegatingLoader($loaderResolver);
+        $result = [];
+        foreach ($resources as $resource) {
+            $result[] = $delegatingLoader->load($resource);
+        }
 
-        return $delegatingLoader->load($resource);
+        return array_merge_recursive(...$result);
+    }
+
+    private function getConfigurationFileDirectories(): array
+    {
+        if (!defined('APP_ROOT_PATH')) {
+            throw new Exception('Constant APP_ROOT_PATH is not defined but required');
+        }
+
+        return [
+            realpath(Constants::CONF_ROOT_PATH),
+            realpath(APP_ROOT_PATH . 'conf/'),
+        ];
     }
 }

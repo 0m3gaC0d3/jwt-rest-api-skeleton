@@ -26,10 +26,10 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace OmegaCode\JwtSecuredApiCore\Controller;
 
-use App\Annotation\ControllerAnnotation;
-use App\Service\ControllerAnnotationService;
+use OmegaCode\JwtSecuredApiCore\Annotation\ControllerAnnotation;
+use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
