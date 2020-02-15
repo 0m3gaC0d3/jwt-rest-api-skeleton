@@ -24,17 +24,15 @@
  * SOFTWARE.
  */
 
-declare(strict_types=1);
+namespace OmegaCode\JwtSecuredApiCore\Action\Auth;
 
-namespace OmegaCode\JwtSecuredApiCore\Controller;
-
-use OmegaCode\JwtSecuredApiCore\Annotation\ControllerAnnotation;
+use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Service\ConsumerValidationService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class AuthController
+class LoginAction extends AbstractAction
 {
     private JsonWebTokenAuth $auth;
 
@@ -46,10 +44,7 @@ class AuthController
         $this->consumerValidationService = $consumerValidationService;
     }
 
-    /**
-     * @ControllerAnnotation(route="/api/tokens", method="post", protected=false)
-     */
-    public function newTokenAction(Request $request, Response $response): Response
+    public function __invoke(Request $request, Response $response): Response
     {
         if (!$this->consumerValidationService->isValid($request)) {
             return $response->withHeader('Content-Type', 'application/json')->withStatus(401, 'Unauthorized');

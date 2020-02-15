@@ -24,30 +24,12 @@
  * SOFTWARE.
  */
 
-declare(strict_types=1);
+namespace OmegaCode\JwtSecuredApiCore\Action;
 
-namespace OmegaCode\JwtSecuredApiCore\Annotation;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
-/**
- * @Annotation
- * @Target({"METHOD"})
- */
-final class ControllerAnnotation
+abstract class AbstractAction
 {
-    /**
-     * @var string
-     * @Required
-     */
-    public string $route = '';
-
-    /**
-     * @var string
-     * @Required
-     */
-    public string $method = '';
-
-    /**
-     * @var bool
-     */
-    public bool $protected = false;
+    abstract public function __invoke(Request $request, Response $response): Response;
 }
