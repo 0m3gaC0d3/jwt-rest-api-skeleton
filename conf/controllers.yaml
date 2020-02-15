@@ -1,2 +1,0 @@
-controllers:
-  - OmegaCode\JwtSecuredApiCore\Controller\AuthController

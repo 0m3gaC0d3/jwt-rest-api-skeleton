@@ -1,0 +1,6 @@
+routes:
+  auth:
+    login:
+      route: /auth
+      method: post
+      action: OmegaCode\JwtSecuredApiCore\Action\Auth\LoginAction

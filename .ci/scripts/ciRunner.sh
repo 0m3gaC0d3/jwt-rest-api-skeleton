@@ -144,6 +144,12 @@ lint)
   SUITE_EXIT_CODE=$?
   docker-compose down
   ;;
+php-fix)
+  setUpDockerComposeDotEnv
+  docker-compose run php-fix
+  SUITE_EXIT_CODE=$?
+  docker-compose down
+  ;;
 unit)
   setUpDockerComposeDotEnv
   docker-compose run unit

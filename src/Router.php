@@ -30,10 +30,10 @@ namespace OmegaCode\JwtSecuredApiCore;
 
 use Exception;
 use InvalidArgumentException;
+use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
-use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -54,58 +54,46 @@ class Router
 
     private ConfigurationFileService $configurationFileService;
 
-    private ControllerAnnotationService $controllerAnnotationService;
-
     private JsonWebTokenAuth $auth;
 
     public function __construct(
         API $api,
         ConfigurationFileService $configurationFileService,
-        ControllerAnnotationService $controllerAnnotationService,
         JsonWebTokenAuth $auth
     ) {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
-        $this->controllerAnnotationService = $controllerAnnotationService;
         $this->auth = $auth;
     }
 
     public function registerRoutes(ContainerInterface $container): void
     {
-        $controllerConfiguration = $this->controllerAnnotationService->getConfiguration();
-        foreach ($controllerConfiguration as $configuration) {
-            $class = trim($configuration['controller']);
-            $route = trim($configuration['route']);
-            $method = strtolower(trim($configuration['method']));
-            $action = trim($configuration['action']);
-            $protected = (bool) $configuration['protected'];
-            if (!$container->has($class)) {
-                throw new Exception("Could not find controller service with id: $class");
+        $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
+        foreach ($routesConfiguration as $group) {
+            foreach ($group as $name => $configuration) {
+                $actionClass = trim($configuration['action']);
+                $route = trim($configuration['route']);
+                $method = strtolower(trim($configuration['method']));
+                $protected = (bool) $configuration['protected'];
+                if (!$container->has($actionClass)) {
+                    throw new Exception("Could not find controller service with id: $actionClass");
+                }
+                $action = $container->get($actionClass);
+                $this->handleRequest($method, $route, $action, $protected);
             }
-            $controller = $container->get($class);
-            $this->handleRequest($method, $route, $controller, $action, $protected);
         }
     }
 
-    private function handleRequest(
-        string $method,
-        string $route,
-        object $controller,
-        string $action,
-        bool $protected
-    ): void {
+    private function handleRequest(string $method, string $route, AbstractAction $action, bool $protected): void
+    {
         if (!in_array($method, self::ALLOWED_METHODS)) {
-            throw new InvalidArgumentException("The method $method is not allowed. Allowed methods are: " . implode(', ', self::ALLOWED_METHODS));
+            throw new InvalidArgumentException("Method $method is not allowed");
         }
         /** @var RouteInterface $router */
         $router = $this->api->$method(
             $route,
-            function (Request $request, Response $response, array $args) use ($controller, $action) {
-                if (!is_callable([$controller, $action])) {
-                    throw new Exception('Can not call ' . get_class($controller) . '::' . $action . '. Method must be public.');
-                }
-
-                return $controller->$action($request, $response, $args);
+            function (Request $request, Response $response) use ($action) {
+                return $action($request, $response);
             }
         );
         if ($protected) {

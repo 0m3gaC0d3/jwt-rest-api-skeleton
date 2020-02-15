@@ -32,7 +32,6 @@ use Exception;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
-use OmegaCode\JwtSecuredApiCore\Service\ControllerAnnotationService;
 use Slim\App as API;
 use Slim\Factory\AppFactory;
 use Slim\ResponseEmitter;
@@ -56,9 +55,7 @@ class Kernel
             $configurationFileService = $this->container->get(ConfigurationFileService::class);
             /** @var JsonWebTokenAuth $auth */
             $auth = $this->container->get(JsonWebTokenAuth::class);
-            /** @var ControllerAnnotationService $controllerAnnotationService */
-            $controllerAnnotationService = $this->container->get(ControllerAnnotationService::class);
-            $router = new Router($this->api, $configurationFileService, $controllerAnnotationService, $auth);
+            $router = new Router($this->api, $configurationFileService, $auth);
             $router->registerRoutes($this->container);
             $this->api->run();
         } catch (Exception $exception) {
