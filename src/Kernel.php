@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use Exception;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
@@ -43,16 +44,29 @@ class Kernel
 
     protected API $api;
 
-    public function __construct()
+    /**
+     * @var KernelExtension[]
+     */
+    protected array $extensions = [];
+
+    public function addKernelExtension(KernelExtension $extension)
     {
-        $this->init();
+        $extension->setCoreKernel($this);
+        $this->extensions[get_class($extension)] = $extension;
+    }
+
+    public function getExtensions(): array
+    {
+        return $this->extensions;
     }
 
     public function run(): void
     {
         try {
+            $this->initContainer();
             /** @var ConfigurationFileService $configurationFileService */
             $configurationFileService = $this->container->get(ConfigurationFileService::class);
+            $configurationFileService->setKernel($this);
             /** @var JsonWebTokenAuth $auth */
             $auth = $this->container->get(JsonWebTokenAuth::class);
             $router = new Router($this->api, $configurationFileService, $auth);
@@ -66,9 +80,9 @@ class Kernel
         }
     }
 
-    private function init(): void
+    private function initContainer(): void
     {
-        $this->container = ContainerFactory::build();
+        $this->container = ContainerFactory::build($this);
         $this->container->compile(true);
         $this->api = AppFactory::create();
         $this->api->addBodyParsingMiddleware();

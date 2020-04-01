@@ -101,6 +101,7 @@ final class JsonWebTokenAuth
 
     private function getKeyFileContent(string $privateKeyPath, string $publicKeyPath): void
     {
+        // TODO check for better solution
         if (!defined('APP_ROOT_PATH')) {
             throw new Exception('Constant APP_ROOT_PATH is not defined but required');
         }

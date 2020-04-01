@@ -69,11 +69,12 @@ class Router
     public function registerRoutes(ContainerInterface $container): void
     {
         $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
+        // TODO validate routes con figuration and error on duplicate entries.
         foreach ($routesConfiguration as $group) {
             foreach ($group as $name => $configuration) {
-                $actionClass = trim($configuration['action']);
-                $route = trim($configuration['route']);
-                $method = strtolower(trim($configuration['method']));
+                $actionClass = trim((string)$configuration['action']);
+                $route = trim((string)$configuration['route']);
+                $method = strtolower(trim((string)$configuration['method']));
                 $protected = (bool) $configuration['protected'];
                 if (!$container->has($actionClass)) {
                     throw new Exception("Could not find controller service with id: $actionClass");

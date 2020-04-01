@@ -28,15 +28,18 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use Exception;
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
 use OmegaCode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Kernel;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 
 class ConfigurationFileService
 {
+    private Kernel $kernel;
+
     public function load(string $configurationFile): array
     {
         $fileLocator = new FileLocator($this->getConfigurationFileDirectories());
@@ -51,15 +54,24 @@ class ConfigurationFileService
         return array_merge_recursive(...$result);
     }
 
+    public function setKernel(Kernel $kernel): void
+    {
+        $this->kernel = $kernel;
+    }
+
     private function getConfigurationFileDirectories(): array
     {
-        if (!defined('APP_ROOT_PATH')) {
-            throw new Exception('Constant APP_ROOT_PATH is not defined but required');
+        $paths = [
+            realpath(Constants::CONF_ROOT_PATH),
+        ];
+        if (0 === count($this->kernel->getExtensions())) {
+            return $paths;
+        }
+        /** @var KernelExtension $extension */
+        foreach ($this->kernel->getExtensions() as $extension) {
+            $paths[] = realpath($extension->getConfigDirectory());
         }
 
-        return [
-            realpath(Constants::CONF_ROOT_PATH),
-            realpath(APP_ROOT_PATH . 'conf/'),
-        ];
+        return $paths;
     }
 }

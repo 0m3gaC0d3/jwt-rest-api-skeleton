@@ -5,7 +5,7 @@ services:
     public: true
   OmegaCode\JwtSecuredApiCore\:
     resource: '../src/*'
-    exclude: '../src/{Config,Middleware,Factory,Kernel.php,Router.php,Constants.php}'
+    exclude: '../src/{Config,Middleware,Factory,Extension,Kernel.php,Router.php,Constants.php}'
 
   OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth:
     arguments:
