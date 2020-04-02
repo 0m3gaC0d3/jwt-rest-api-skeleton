@@ -30,8 +30,11 @@ namespace OmegaCode\JwtSecuredApiCore;
 
 use Exception;
 use InvalidArgumentException;
+use Kint\Kint;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Config\RouteConfig;
+use OmegaCode\JwtSecuredApiCore\Factory\RouteConfigFactory;
 use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Psr\Container\ContainerInterface;
@@ -69,36 +72,42 @@ class Router
     public function registerRoutes(ContainerInterface $container): void
     {
         $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
-        // TODO validate routes con figuration and error on duplicate entries.
+        // TODO validate routes configuration and error on duplicate entries.
         foreach ($routesConfiguration as $group) {
             foreach ($group as $name => $configuration) {
-                $actionClass = trim((string)$configuration['action']);
-                $route = trim((string)$configuration['route']);
-                $method = strtolower(trim((string)$configuration['method']));
-                $protected = (bool) $configuration['protected'];
-                if (!$container->has($actionClass)) {
-                    throw new Exception("Could not find controller service with id: $actionClass");
-                }
-                $action = $container->get($actionClass);
-                $this->handleRequest($method, $route, $action, $protected);
+                $routeConfig = RouteConfigFactory::build($container, $configuration);
+                $this->handleRequest($routeConfig);
             }
         }
     }
 
-    private function handleRequest(string $method, string $route, AbstractAction $action, bool $protected): void
+    private function handleRequest(RouteConfig $config): void
     {
-        if (!in_array($method, self::ALLOWED_METHODS)) {
-            throw new InvalidArgumentException("Method $method is not allowed");
+        if ($config->getAllowedMethods() != array_intersect($config->getAllowedMethods(), self::ALLOWED_METHODS)) {
+            throw new InvalidArgumentException("One or more of the given route ".$config->getRoute()." is not allowed");
         }
-        /** @var RouteInterface $router */
-        $router = $this->api->$method(
-            $route,
-            function (Request $request, Response $response) use ($action) {
-                return $action($request, $response);
-            }
-        );
-        if ($protected) {
-            $router->addMiddleware(new JsonWebTokenMiddleware($this->auth, $this->api->getResponseFactory()));
+        /** @var string $method */
+        foreach ($config->getAllowedMethods() as $method) {
+            $action = $config->getAction();
+            /** @var RouteInterface $router */
+            $router = $this->api->$method(
+                $config->getRoute(),
+                function (Request $request, Response $response) use ($action) {
+                    return $action($request, $response);
+                }
+            );
+            $this->addMiddlewares($router, $config->getMiddlewares());
+        }
+    }
+
+    private function addMiddlewares(RouteInterface $router, array $middlewares) : void
+    {
+        if (0 === count($middlewares)) {
+            return;
+        }
+        /** @var string $middleware */
+        foreach ($middlewares as $middleware) {
+            $router->add($middleware);
         }
     }
 }

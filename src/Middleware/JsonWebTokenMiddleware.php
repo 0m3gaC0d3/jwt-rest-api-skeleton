@@ -29,22 +29,22 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\App as API;
 
 class JsonWebTokenMiddleware implements MiddlewareInterface
 {
     private JsonWebTokenAuth $jsonWebTokenAuth;
 
-    private ResponseFactoryInterface $responseFactory;
+    private API $api;
 
-    public function __construct(JsonWebTokenAuth $jwtAuth, ResponseFactoryInterface $responseFactory)
+    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
     {
         $this->jsonWebTokenAuth = $jwtAuth;
-        $this->responseFactory = $responseFactory;
+        $this->api = $api;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -52,7 +52,7 @@ class JsonWebTokenMiddleware implements MiddlewareInterface
         $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
         $token = $authorization[1] ?? '';
         if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            return $this->responseFactory->createResponse()
+            return $this->api->getResponseFactory()->createResponse()
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(401, 'Unauthorized');
         }

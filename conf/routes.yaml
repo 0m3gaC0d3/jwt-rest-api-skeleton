@@ -2,5 +2,5 @@ routes:
   auth:
     login:
       route: /auth
-      method: post
+      methods: [post]
       action: OmegaCode\JwtSecuredApiCore\Action\Auth\LoginAction

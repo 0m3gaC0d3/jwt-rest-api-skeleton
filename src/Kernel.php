@@ -30,7 +30,6 @@ namespace OmegaCode\JwtSecuredApiCore;
 
 use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use Exception;
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Slim\App as API;
@@ -67,9 +66,7 @@ class Kernel
             /** @var ConfigurationFileService $configurationFileService */
             $configurationFileService = $this->container->get(ConfigurationFileService::class);
             $configurationFileService->setKernel($this);
-            /** @var JsonWebTokenAuth $auth */
-            $auth = $this->container->get(JsonWebTokenAuth::class);
-            $router = new Router($this->api, $configurationFileService, $auth);
+            $router = $this->container->get(Router::class);
             $router->registerRoutes($this->container);
             $this->api->run();
         } catch (Exception $exception) {
@@ -84,8 +81,9 @@ class Kernel
     {
         $this->container = ContainerFactory::build($this);
         $this->container->compile(true);
-        $this->api = AppFactory::create();
+        $this->api = AppFactory::create(null, $this->container);
         $this->api->addBodyParsingMiddleware();
+        $this->container->set(get_class($this->api), $this->api);
     }
 
     private function emitServerErrorResponse(): void
