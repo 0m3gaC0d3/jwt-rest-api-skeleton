@@ -1,6 +1,6 @@
 routes:
-  auth:
-    login:
-      route: /auth
-      methods: [post]
-      action: OmegaCode\JwtSecuredApiCore\Action\Auth\LoginAction
+  -
+    name: auth.login
+    route: /auth
+    methods: [post]
+    action: OmegaCode\JwtSecuredApiCore\Action\Auth\LoginAction

@@ -28,30 +28,22 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use Exception;
-use InvalidArgumentException;
-use Kint\Kint;
-use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use OmegaCode\JwtSecuredApiCore\Config\RouteConfig;
-use OmegaCode\JwtSecuredApiCore\Factory\RouteConfigFactory;
-use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
+use OmegaCode\JwtSecuredApiCore\Configuration\Processor\RouteConfigurationProcessor;
+use OmegaCode\JwtSecuredApiCore\Event\RouteCollectionFilledEvent;
+use OmegaCode\JwtSecuredApiCore\Factory\Route\CollectionFactory;
+use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App as API;
 use Slim\Interfaces\RouteInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Router
 {
-    private const ALLOWED_METHODS = [
-        'get',
-        'post',
-        'put',
-        'delete',
-        'patch',
-    ];
+    public const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch'];
 
     private API $api;
 
@@ -59,33 +51,38 @@ class Router
 
     private JsonWebTokenAuth $auth;
 
+    private EventDispatcher $eventDispatcher;
+
     public function __construct(
         API $api,
         ConfigurationFileService $configurationFileService,
-        JsonWebTokenAuth $auth
+        JsonWebTokenAuth $auth,
+        EventDispatcher $eventDispatcher
     ) {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
         $this->auth = $auth;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function registerRoutes(ContainerInterface $container): void
     {
-        $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
-        // TODO validate routes configuration and error on duplicate entries.
-        foreach ($routesConfiguration as $group) {
-            foreach ($group as $name => $configuration) {
-                $routeConfig = RouteConfigFactory::build($container, $configuration);
-                $this->handleRequest($routeConfig);
-            }
+        $configuration = $this->configurationFileService->load('routes.yaml');
+        $routeCollection = CollectionFactory::build(
+            $container,
+            (new RouteConfigurationProcessor())->process($configuration)
+        );
+        $this->eventDispatcher->dispatch(
+            new RouteCollectionFilledEvent($routeCollection),
+            RouteCollectionFilledEvent::NAME
+        );
+        foreach ($routeCollection as $routeConfig) {
+            $this->handleRequest($routeConfig);
         }
     }
 
-    private function handleRequest(RouteConfig $config): void
+    private function handleRequest(Configuration $config): void
     {
-        if ($config->getAllowedMethods() != array_intersect($config->getAllowedMethods(), self::ALLOWED_METHODS)) {
-            throw new InvalidArgumentException("One or more of the given route ".$config->getRoute()." is not allowed");
-        }
         /** @var string $method */
         foreach ($config->getAllowedMethods() as $method) {
             $action = $config->getAction();
@@ -100,9 +97,9 @@ class Router
         }
     }
 
-    private function addMiddlewares(RouteInterface $router, array $middlewares) : void
+    private function addMiddlewares(RouteInterface $router, array $middlewares): void
     {
-        if (0 === count($middlewares)) {
+        if (count($middlewares) === 0) {
             return;
         }
         /** @var string $middleware */

@@ -28,12 +28,14 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Factory;
 
-use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Kernel;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 final class ContainerFactory
 {
@@ -42,9 +44,11 @@ final class ContainerFactory
     public static function build(Kernel $kernel): ContainerBuilder
     {
         $containerBuilder = new ContainerBuilder();
+        $containerBuilder->addCompilerPass(new RegisterListenersPass(EventDispatcher::class));
+        $containerBuilder->register(EventDispatcher::class, EventDispatcher::class);
         foreach (static::getConfigurationFileDirectories($kernel) as $resource) {
             $loader = new YamlFileLoader($containerBuilder, new FileLocator($resource));
-            if (file_exists($resource.'/'.self::CONFIGURATION_FILE_NAME)) {
+            if (file_exists($resource . '/' . self::CONFIGURATION_FILE_NAME)) {
                 $loader->load(self::CONFIGURATION_FILE_NAME);
             }
         }
@@ -57,7 +61,7 @@ final class ContainerFactory
         $paths = [
             realpath(Constants::CONF_ROOT_PATH),
         ];
-        if (0 === count($kernel->getExtensions())) {
+        if (count($kernel->getExtensions()) === 0) {
             return $paths;
         }
         /** @var KernelExtension $extension */

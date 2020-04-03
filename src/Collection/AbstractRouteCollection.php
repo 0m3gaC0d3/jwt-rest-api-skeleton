@@ -26,18 +26,54 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+namespace OmegaCode\JwtSecuredApiCore\Collection;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
+use Iterator;
+use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 
-abstract class KernelExtension
+abstract class AbstractRouteCollection implements Iterator
 {
-    private Kernel $coreKernel;
+    protected int $position = 0;
 
-    public function setCoreKernel(Kernel $coreKernel): void
+    /**
+     * @var Configuration[]
+     */
+    protected array $values = [];
+
+    public function __construct()
     {
-        $this->coreKernel = $coreKernel;
+        $this->position = 0;
     }
 
-    abstract public function getConfigDirectory(): string;
+    public function rewind(): void
+    {
+        $this->position = 0;
+        $this->values = array_values($this->values);
+    }
+
+    public function clear(): void
+    {
+        $this->values = [];
+        $this->rewind();
+    }
+
+    public function current(): Configuration
+    {
+        return $this->values[$this->position];
+    }
+
+    public function key(): int
+    {
+        return $this->position;
+    }
+
+    public function next(): void
+    {
+        ++$this->position;
+    }
+
+    public function valid(): bool
+    {
+        return isset($this->values[$this->position]);
+    }
 }

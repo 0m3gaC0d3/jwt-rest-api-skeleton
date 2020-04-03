@@ -26,18 +26,24 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+namespace OmegaCode\JwtSecuredApiCore\Event;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
+use OmegaCode\JwtSecuredApiCore\Collection\RouteCollection;
+use Symfony\Contracts\EventDispatcher\Event;
 
-abstract class KernelExtension
+class RouteCollectionFilledEvent extends Event
 {
-    private Kernel $coreKernel;
+    public const NAME = 'route_collection.filled';
 
-    public function setCoreKernel(Kernel $coreKernel): void
+    protected RouteCollection $collection;
+
+    public function __construct(RouteCollection $collection)
     {
-        $this->coreKernel = $coreKernel;
+        $this->collection = $collection;
     }
 
-    abstract public function getConfigDirectory(): string;
+    public function getCollection(): RouteCollection
+    {
+        return $this->collection;
+    }
 }

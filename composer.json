@@ -19,6 +19,7 @@
         "symfony/dependency-injection": "^5.0",
         "symfony/config": "^5.0",
         "symfony/yaml": "^5.0",
+        "symfony/event-dispatcher":"^5.0",
         "http-interop/http-factory-guzzle": "^1.0",
         "lcobucci/jwt": "^3.3",
         "cakephp/chronos": "^2.0",

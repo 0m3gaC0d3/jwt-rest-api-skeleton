@@ -28,8 +28,8 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use Exception;
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Slim\App as API;
@@ -48,7 +48,7 @@ class Kernel
      */
     protected array $extensions = [];
 
-    public function addKernelExtension(KernelExtension $extension)
+    public function addKernelExtension(KernelExtension $extension): void
     {
         $extension->setCoreKernel($this);
         $this->extensions[get_class($extension)] = $extension;
@@ -61,11 +61,13 @@ class Kernel
 
     public function run(): void
     {
+        (new ErrorHandler());
         try {
             $this->initContainer();
             /** @var ConfigurationFileService $configurationFileService */
             $configurationFileService = $this->container->get(ConfigurationFileService::class);
             $configurationFileService->setKernel($this);
+            /** @var Router $router */
             $router = $this->container->get(Router::class);
             $router->registerRoutes($this->container);
             $this->api->run();
@@ -90,9 +92,8 @@ class Kernel
     {
         $response = $this->api->getResponseFactory()->createResponse()
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(500, 'Server Error');
+            ->withStatus(500, 'Internal server Error');
         $responseEmitter = new ResponseEmitter();
         $responseEmitter->emit($response);
-        die();
     }
 }

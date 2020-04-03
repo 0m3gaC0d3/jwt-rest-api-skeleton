@@ -26,18 +26,21 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+namespace OmegaCode\JwtSecuredApiCore\Factory\Route;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
+use OmegaCode\JwtSecuredApiCore\Collection\RouteCollection;
+use Psr\Container\ContainerInterface;
 
-abstract class KernelExtension
+class CollectionFactory
 {
-    private Kernel $coreKernel;
-
-    public function setCoreKernel(Kernel $coreKernel): void
+    public static function build(ContainerInterface $container, array $routesConfiguration): RouteCollection
     {
-        $this->coreKernel = $coreKernel;
-    }
+        $routeCollection = new RouteCollection();
+        foreach ($routesConfiguration as $configuration) {
+            $routeConfig = ConfigurationFactory::build($container, $configuration);
+            $routeCollection->add($routeConfig);
+        }
 
-    abstract public function getConfigDirectory(): string;
+        return $routeCollection;
+    }
 }

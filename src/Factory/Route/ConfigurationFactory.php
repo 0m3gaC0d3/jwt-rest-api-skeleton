@@ -26,18 +26,26 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+namespace OmegaCode\JwtSecuredApiCore\Factory\Route;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
+use Exception;
+use OmegaCode\JwtSecuredApiCore\Route\Configuration;
+use Psr\Container\ContainerInterface;
 
-abstract class KernelExtension
+class ConfigurationFactory
 {
-    private Kernel $coreKernel;
-
-    public function setCoreKernel(Kernel $coreKernel): void
+    public static function build(ContainerInterface $container, array $configuration): Configuration
     {
-        $this->coreKernel = $coreKernel;
-    }
+        $service = trim((string) $configuration['action']);
+        if (!$container->has($service)) {
+            throw new Exception("Could not find controller service with id: $service");
+        }
+        $name = trim((string) $configuration['name']);
+        $action = $container->get($service);
+        $route = trim((string) $configuration['route']);
+        $methods = (array) $configuration['methods'];
+        $middlewares = (array) ($configuration['middlewares'] ?? []);
 
-    abstract public function getConfigDirectory(): string;
+        return new Configuration($name, $action, $route, $methods, $middlewares);
+    }
 }

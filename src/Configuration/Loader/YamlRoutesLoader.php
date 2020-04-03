@@ -24,20 +24,36 @@
  * SOFTWARE.
  */
 
-declare(strict_types=1);
+namespace OmegaCode\JwtSecuredApiCore\Configuration\Loader;
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+use Symfony\Component\Config\Loader\FileLoader;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Yaml\Yaml;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
-
-abstract class KernelExtension
+class YamlRoutesLoader extends FileLoader
 {
-    private Kernel $coreKernel;
-
-    public function setCoreKernel(Kernel $coreKernel): void
+    /**
+     * @param mixed $resource
+     *
+     * @return mixed
+     */
+    public function load($resource, string $type = null)
     {
-        $this->coreKernel = $coreKernel;
+        if (!file_exists($resource)) {
+            throw new IOException("File $resource does not exist");
+        }
+        $fileContent = file_get_contents($resource);
+        if (is_string($fileContent) && !empty($fileContent)) {
+            return Yaml::parse($fileContent);
+        }
+        throw new IOException("Could not read file $resource");
     }
 
-    abstract public function getConfigDirectory(): string;
+    /**
+     * {@inheritdoc}
+     */
+    public function supports($resource, string $type = null): bool
+    {
+        return is_string($resource) && pathinfo($resource, PATHINFO_EXTENSION) === 'yaml';
+    }
 }

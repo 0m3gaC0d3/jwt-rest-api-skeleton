@@ -28,9 +28,9 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
-use OmegaCode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
+use OmegaCode\JwtSecuredApiCore\Configuration\Loader\YamlRoutesLoader;
 use OmegaCode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Kernel;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
@@ -46,12 +46,12 @@ class ConfigurationFileService
         $resources = (array) $fileLocator->locate($configurationFile, null, false);
         $loaderResolver = new LoaderResolver([new YamlRoutesLoader($fileLocator)]);
         $delegatingLoader = new DelegatingLoader($loaderResolver);
-        $result = [];
+        $configs = [];
         foreach ($resources as $resource) {
-            $result[] = $delegatingLoader->load($resource);
+            $configs[] = $delegatingLoader->load($resource);
         }
 
-        return array_merge_recursive(...$result);
+        return $configs;
     }
 
     public function setKernel(Kernel $kernel): void
@@ -64,7 +64,7 @@ class ConfigurationFileService
         $paths = [
             realpath(Constants::CONF_ROOT_PATH),
         ];
-        if (0 === count($this->kernel->getExtensions())) {
+        if (count($this->kernel->getExtensions()) === 0) {
             return $paths;
         }
         /** @var KernelExtension $extension */
