@@ -30,6 +30,8 @@ namespace OmegaCode\JwtSecuredApiCore;
 
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Configuration\Processor\RouteConfigurationProcessor;
+use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
+use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Event\RouteCollectionFilledEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\Route\CollectionFactory;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
@@ -86,11 +88,16 @@ class Router
         /** @var string $method */
         foreach ($config->getAllowedMethods() as $method) {
             $action = $config->getAction();
+            $eventDispatcher = $this->eventDispatcher;
             /** @var RouteInterface $router */
             $router = $this->api->$method(
                 $config->getRoute(),
-                function (Request $request, Response $response) use ($action) {
-                    return $action($request, $response);
+                function (Request $request, Response $response) use ($action, $eventDispatcher) {
+                    $eventDispatcher->dispatch(new PreRequestEvent($request, $response), PreRequestEvent::NAME);
+                    $response = $action($request, $response);
+                    $eventDispatcher->dispatch(new PostRequestEvent($request, $response), PostRequestEvent::NAME);
+
+                    return $response;
                 }
             );
             $this->addMiddlewares($router, $config->getMiddlewares());

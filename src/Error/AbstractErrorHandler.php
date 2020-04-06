@@ -34,6 +34,7 @@ use Psr\Log\LoggerInterface;
 abstract class AbstractErrorHandler
 {
     public const DEFAULT_RESPONSE = '{"status":500, "message": "Internal server error"}';
+
     protected const ERROR_TYPE_MAPPING = [
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
@@ -59,6 +60,9 @@ abstract class AbstractErrorHandler
 
     public function __construct(bool $showErrors, bool $logErrors, ?LoggerInterface $logger = null)
     {
+        ini_set('display_errors', 'on');
+        error_reporting(E_ALL & ~E_NOTICE);
+        ini_set('error_reporting', (string) (E_ALL & ~E_NOTICE));
         $this->showErrors = $showErrors;
         $this->logErrors = $logErrors;
         $this->logger = $logger;

@@ -37,15 +37,16 @@ class LowLevelErrorHandler extends AbstractErrorHandler
         parent::__construct($showErrors, $logErrors);
         $this->startTime = microtime(true);
         ob_start();
-        ini_set('display_errors', 'on');
-        error_reporting(E_ERROR | E_WARNING | E_PARSE);
         set_error_handler([$this, 'scriptError']);
         register_shutdown_function([$this, 'shutdown']);
     }
 
     public function scriptError(int $type, string $message, string $file, int $line): bool
     {
-        if (!is_null($this->logger)) {
+        if ($type === E_NOTICE) {
+            return true;
+        }
+        if (!is_null($this->logger) && $this->logErrors) {
             $this->logger->error($message);
         }
         if (!headers_sent()) {

@@ -24,35 +24,35 @@
  * SOFTWARE.
  */
 
-namespace OmegaCode\JwtSecuredApiCore\Error;
+declare(strict_types=1);
 
-use Slim\Interfaces\ErrorRendererInterface;
-use Throwable;
+namespace OmegaCode\JwtSecuredApiCore\Event\Request;
 
-class ApiErrorRenderer extends AbstractErrorHandler implements ErrorRendererInterface
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Symfony\Contracts\EventDispatcher\Event;
+
+class PreRequestEvent extends Event
 {
-    public function __invoke(Throwable $exception, bool $displayErrorDetails): string
-    {
-        if (!is_null($this->logger) && $this->logErrors) {
-            $this->logger->error($exception->getMessage());
-        }
-        $severity = (static::ERROR_TYPE_MAPPING[$exception->getCode()] ?? 'Error');
-        $response = ['status' => $this->getStatus($exception), 'message' => $exception->getMessage()];
-        if ($displayErrorDetails) {
-            $response = array_merge($response, [
-                'message' => $exception->getMessage(),
-                'line' => $exception->getLine(),
-                'file' => $exception->getFile(),
-                'backtrace' => $this->buildBacktraceInformation(),
-                'severity' => $severity,
-            ]);
-        }
+    public const NAME = 'request.pre';
 
-        return $this->buildJsonResponse($response);
+    protected RequestInterface $request;
+
+    protected ResponseInterface $response;
+
+    public function __construct(RequestInterface $request, ResponseInterface $response)
+    {
+        $this->request = $request;
+        $this->response = $response;
     }
 
-    private function getStatus(Throwable $exception): int
+    public function getRequest(): RequestInterface
     {
-        return $exception->getCode() > 200 && $exception->getCode() < 600 ? $exception->getCode() : 500;
+        return $this->request;
+    }
+
+    public function getResponse(): ResponseInterface
+    {
+        return $this->response;
     }
 }
