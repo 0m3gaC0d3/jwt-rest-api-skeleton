@@ -28,13 +28,14 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use Exception;
+use OmegaCode\JwtSecuredApiCore\Error\ApiErrorRenderer;
+use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Slim\App as API;
 use Slim\Factory\AppFactory;
-use Slim\ResponseEmitter;
+use Slim\Handlers\ErrorHandler;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class Kernel
@@ -61,39 +62,40 @@ class Kernel
 
     public function run(): void
     {
-        (new ErrorHandler());
-        try {
-            $this->initContainer();
-            /** @var ConfigurationFileService $configurationFileService */
-            $configurationFileService = $this->container->get(ConfigurationFileService::class);
-            $configurationFileService->setKernel($this);
-            /** @var Router $router */
-            $router = $this->container->get(Router::class);
-            $router->registerRoutes($this->container);
-            $this->api->run();
-        } catch (Exception $exception) {
-            if ((bool) $_ENV['SHOW_ERRORS']) {
-                throw $exception;
-            }
-            $this->emitServerErrorResponse();
-        }
+        (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG']));
+        $this->initContainer();
+        $this->initApi();
+        /** @var ConfigurationFileService $configurationFileService */
+        $configurationFileService = $this->container->get(ConfigurationFileService::class);
+        $configurationFileService->setKernel($this);
+        /** @var Router $router */
+        $router = $this->container->get(Router::class);
+        $router->registerRoutes($this->container);
+        $this->api->run();
     }
 
     private function initContainer(): void
     {
         $this->container = ContainerFactory::build($this);
         $this->container->compile(true);
-        $this->api = AppFactory::create(null, $this->container);
-        $this->api->addBodyParsingMiddleware();
-        $this->container->set(get_class($this->api), $this->api);
     }
 
-    private function emitServerErrorResponse(): void
+    private function initApi(): void
     {
-        $response = $this->api->getResponseFactory()->createResponse()
-            ->withHeader('Content-Type', 'application/json')
-            ->withStatus(500, 'Internal server Error');
-        $responseEmitter = new ResponseEmitter();
-        $responseEmitter->emit($response);
+        $this->api = AppFactory::create(null, $this->container);
+        $this->api->addBodyParsingMiddleware();
+        $errorMiddleware = $this->api->addErrorMiddleware(
+            (bool) $_ENV['SHOW_ERRORS'],
+            (bool) $_ENV['ENABLE_LOG'],
+            (bool) $_ENV['SHOW_ERRORS']
+        );
+        /** @var ErrorHandler $errorHandler */
+        $errorHandler = $errorMiddleware->getDefaultErrorHandler();
+        $errorHandler->forceContentType('application/json');
+        $errorHandler->registerErrorRenderer(
+            'application/json',
+            new ApiErrorRenderer((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG'])
+        );
+        $this->container->set(get_class($this->api), $this->api);
     }
 }

@@ -31,6 +31,7 @@ use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
 use OmegaCode\JwtSecuredApiCore\Service\ConsumerValidationService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpUnauthorizedException;
 
 class LoginAction extends AbstractAction
 {
@@ -47,7 +48,7 @@ class LoginAction extends AbstractAction
     public function __invoke(Request $request, Response $response): Response
     {
         if (!$this->consumerValidationService->isValid($request)) {
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(401, 'Unauthorized');
+            throw new HttpUnauthorizedException($request);
         }
         $result = [
             'access_token' => $this->auth->createJwt([]),
