@@ -45,6 +45,9 @@ class LowLevelErrorHandler extends AbstractErrorHandler
 
     public function scriptError(int $type, string $message, string $file, int $line): bool
     {
+        if (!is_null($this->logger)) {
+            $this->logger->error($message);
+        }
         if (!headers_sent()) {
             header('HTTP/1.1 500 Internal Server Error');
             header('Content-Type: application/json');
@@ -53,7 +56,7 @@ class LowLevelErrorHandler extends AbstractErrorHandler
             ob_end_clean();
         }
         echo $this->outputErrorInformation($type, $message, $file, $line);
-        exit();
+        die();
     }
 
     public function shutdown(): void

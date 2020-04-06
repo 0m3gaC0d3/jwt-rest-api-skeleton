@@ -29,9 +29,11 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Error;
 
 use Exception;
+use Psr\Log\LoggerInterface;
 
 abstract class AbstractErrorHandler
 {
+    public const DEFAULT_RESPONSE = '{"status":500, "message": "Internal server error"}';
     protected const ERROR_TYPE_MAPPING = [
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
@@ -49,16 +51,22 @@ abstract class AbstractErrorHandler
         404 => 'User Error - Route not found',
     ];
 
-    protected const DEFAULT_RESPONSE = '{"status":"500", "message": "Internal server error"}';
-
     protected bool $showErrors = false;
 
     protected bool $logErrors = false;
 
-    public function __construct(bool $showErrors, bool $logErrors)
+    protected ?LoggerInterface $logger;
+
+    public function __construct(bool $showErrors, bool $logErrors, ?LoggerInterface $logger = null)
     {
         $this->showErrors = $showErrors;
         $this->logErrors = $logErrors;
+        $this->logger = $logger;
+    }
+
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 
     protected function buildBacktraceInformation(): array
@@ -87,6 +95,6 @@ abstract class AbstractErrorHandler
         }
 
         return is_string($response) ? str_replace('\n', ' ', $response) :
-            '{"status":"500", "message": "Internal server error"}';
+            '{"status":500, "message": "Internal server error"}';
     }
 }

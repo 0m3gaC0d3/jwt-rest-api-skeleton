@@ -33,6 +33,9 @@ class ApiErrorRenderer extends AbstractErrorHandler implements ErrorRendererInte
 {
     public function __invoke(Throwable $exception, bool $displayErrorDetails): string
     {
+        if (!is_null($this->logger)) {
+            $this->logger->error($exception->getMessage());
+        }
         $severity = (static::ERROR_TYPE_MAPPING[$exception->getCode()] ?? 'Error');
         $response = ['status' => $this->getStatus($exception), 'message' => $exception->getMessage()];
         if ($displayErrorDetails) {

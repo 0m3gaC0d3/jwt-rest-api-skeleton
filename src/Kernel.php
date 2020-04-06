@@ -28,6 +28,9 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use OmegaCode\JwtSecuredApiCore\Error\AbstractErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Error\ApiErrorRenderer;
 use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
@@ -49,6 +52,17 @@ class Kernel
      */
     protected array $extensions = [];
 
+    public function __construct()
+    {
+        if (!defined('APP_ROOT_PATH')) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo (bool) $_ENV['SHOW_ERRORS'] ? '{"status": 500, "message": "Constant APP_ROOT_PATH is not defined"}' :
+                AbstractErrorHandler::DEFAULT_RESPONSE;
+            die();
+        }
+    }
+
     public function addKernelExtension(KernelExtension $extension): void
     {
         $extension->setCoreKernel($this);
@@ -62,9 +76,11 @@ class Kernel
 
     public function run(): void
     {
-        (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG']));
+        $lowLevelErrorHandler = new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG']);
         $this->initContainer();
-        $this->initApi();
+        $logger = $this->initLogger();
+        $lowLevelErrorHandler->setLogger($logger);
+        $this->initApi($logger);
         /** @var ConfigurationFileService $configurationFileService */
         $configurationFileService = $this->container->get(ConfigurationFileService::class);
         $configurationFileService->setKernel($this);
@@ -80,22 +96,31 @@ class Kernel
         $this->container->compile(true);
     }
 
-    private function initApi(): void
+    private function initApi(Logger $logger): void
     {
         $this->api = AppFactory::create(null, $this->container);
         $this->api->addBodyParsingMiddleware();
         $errorMiddleware = $this->api->addErrorMiddleware(
             (bool) $_ENV['SHOW_ERRORS'],
             (bool) $_ENV['ENABLE_LOG'],
-            (bool) $_ENV['SHOW_ERRORS']
+            (bool) $_ENV['SHOW_ERRORS'],
         );
         /** @var ErrorHandler $errorHandler */
         $errorHandler = $errorMiddleware->getDefaultErrorHandler();
         $errorHandler->forceContentType('application/json');
         $errorHandler->registerErrorRenderer(
             'application/json',
-            new ApiErrorRenderer((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG'])
+            new ApiErrorRenderer((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG'], $logger)
         );
         $this->container->set(get_class($this->api), $this->api);
+    }
+
+    private function initLogger(): Logger
+    {
+        $logger = new Logger('API');
+        $logger->pushHandler(new StreamHandler(APP_ROOT_PATH . 'var/log/api.log', Logger::DEBUG));
+        $this->container->set(get_class($logger), $logger);
+
+        return $logger;
     }
 }

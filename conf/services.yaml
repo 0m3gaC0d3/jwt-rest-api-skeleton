@@ -16,3 +16,6 @@ services:
 
   Slim\App:
     synthetic: true
+
+  Monolog\Logger:
+    synthetic: true
