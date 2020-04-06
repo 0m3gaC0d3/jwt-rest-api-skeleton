@@ -28,14 +28,19 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use Exception;
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Error\AbstractErrorHandler;
+use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
+use OmegaCode\JwtSecuredApiCore\Event\Kernel\PostKernelInitializationEvent;
+use OmegaCode\JwtSecuredApiCore\Event\Kernel\PreKernelInitializationEvent;
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
+use OmegaCode\JwtSecuredApiCore\Factory\ApiFactory;
 use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
+use OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
+use Psr\Log\LoggerInterface;
 use Slim\App as API;
-use Slim\Factory\AppFactory;
-use Slim\ResponseEmitter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Kernel
 {
@@ -43,44 +48,65 @@ class Kernel
 
     protected API $api;
 
+    /**
+     * @var KernelExtension[]
+     */
+    protected array $extensions = [];
+
+    private LoggerInterface $logger;
+
     public function __construct()
     {
-        $this->init();
+        if (!defined('APP_ROOT_PATH')) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo (bool) $_ENV['SHOW_ERRORS'] ? '{"status": 500, "message": "Constant APP_ROOT_PATH is not defined"}' :
+                AbstractErrorHandler::DEFAULT_RESPONSE;
+            die();
+        }
+        (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], false));
+    }
+
+    public function addKernelExtension(KernelExtension $extension): void
+    {
+        $extension->setCoreKernel($this);
+        $this->extensions[get_class($extension)] = $extension;
+    }
+
+    public function getExtensions(): array
+    {
+        return $this->extensions;
     }
 
     public function run(): void
     {
-        try {
-            /** @var ConfigurationFileService $configurationFileService */
-            $configurationFileService = $this->container->get(ConfigurationFileService::class);
-            /** @var JsonWebTokenAuth $auth */
-            $auth = $this->container->get(JsonWebTokenAuth::class);
-            $router = new Router($this->api, $configurationFileService, $auth);
-            $router->registerRoutes($this->container);
-            $this->api->run();
-        } catch (Exception $exception) {
-            if ((bool) $_ENV['SHOW_ERRORS']) {
-                throw $exception;
-            }
-            $this->emitServerErrorResponse();
-        }
+        $this->initialize();
+        /** @var EventDispatcher $eventDispatcher */
+        $eventDispatcher = $this->container->get(EventDispatcher::class);
+        $eventDispatcher->dispatch(
+            new PreKernelInitializationEvent($this->container),
+            PreKernelInitializationEvent::NAME
+        );
+        /** @var ConfigurationFileService $configurationFileService */
+        $configurationFileService = $this->container->get(ConfigurationFileService::class);
+        $configurationFileService->setKernel($this);
+        /** @var Router $router */
+        $router = $this->container->get(Router::class);
+        $router->registerRoutes($this->container);
+        $eventDispatcher->dispatch(
+            new PostKernelInitializationEvent($this->api),
+            PostKernelInitializationEvent::NAME
+        );
+        $this->api->run();
     }
 
-    private function init(): void
+    protected function initialize(): void
     {
-        $this->container = ContainerFactory::build();
+        $this->container = ContainerFactory::build($this);
         $this->container->compile(true);
-        $this->api = AppFactory::create();
-        $this->api->addBodyParsingMiddleware();
-    }
-
-    private function emitServerErrorResponse(): void
-    {
-        $response = $this->api->getResponseFactory()->createResponse()
-            ->withHeader('Content-Type', 'application/json')
-            ->withStatus(500, 'Server Error');
-        $responseEmitter = new ResponseEmitter();
-        $responseEmitter->emit($response);
-        die();
+        $this->logger = LoggerFactory::build();
+        $this->api = ApiFactory::build($this->container, $this->logger);
+        $this->container->set(get_class($this->logger), $this->logger);
+        $this->container->set(get_class($this->api), $this->api);
     }
 }

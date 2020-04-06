@@ -26,39 +26,33 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Event\Request;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\App as API;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+class PreRequestEvent extends Event
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
+    public const NAME = 'request.pre';
 
-    private API $api;
+    protected RequestInterface $request;
 
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    protected ResponseInterface $response;
+
+    public function __construct(RequestInterface $request, ResponseInterface $response)
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
-        $this->api = $api;
+        $this->request = $request;
+        $this->response = $response;
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function getRequest(): RequestInterface
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            return $this->api->getResponseFactory()->createResponse()
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(401, 'Unauthorized');
-        }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
+        return $this->request;
+    }
 
-        return $handler->handle($request);
+    public function getResponse(): ResponseInterface
+    {
+        return $this->response;
     }
 }

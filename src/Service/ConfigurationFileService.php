@@ -28,38 +28,50 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use Exception;
-use OmegaCode\JwtSecuredApiCore\Config\Loader\YamlRoutesLoader;
+use OmegaCode\JwtSecuredApiCore\Configuration\Loader\YamlRoutesLoader;
 use OmegaCode\JwtSecuredApiCore\Constants;
+use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
+use OmegaCode\JwtSecuredApiCore\Kernel;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 
 class ConfigurationFileService
 {
+    private Kernel $kernel;
+
     public function load(string $configurationFile): array
     {
         $fileLocator = new FileLocator($this->getConfigurationFileDirectories());
         $resources = (array) $fileLocator->locate($configurationFile, null, false);
         $loaderResolver = new LoaderResolver([new YamlRoutesLoader($fileLocator)]);
         $delegatingLoader = new DelegatingLoader($loaderResolver);
-        $result = [];
+        $configs = [];
         foreach ($resources as $resource) {
-            $result[] = $delegatingLoader->load($resource);
+            $configs[] = $delegatingLoader->load($resource);
         }
 
-        return array_merge_recursive(...$result);
+        return $configs;
+    }
+
+    public function setKernel(Kernel $kernel): void
+    {
+        $this->kernel = $kernel;
     }
 
     private function getConfigurationFileDirectories(): array
     {
-        if (!defined('APP_ROOT_PATH')) {
-            throw new Exception('Constant APP_ROOT_PATH is not defined but required');
+        $paths = [
+            realpath(Constants::CONF_ROOT_PATH),
+        ];
+        if (count($this->kernel->getExtensions()) === 0) {
+            return $paths;
+        }
+        /** @var KernelExtension $extension */
+        foreach ($this->kernel->getExtensions() as $extension) {
+            $paths[] = realpath($extension->getConfigDirectory());
         }
 
-        return [
-            realpath(Constants::CONF_ROOT_PATH),
-            realpath(APP_ROOT_PATH . 'conf/'),
-        ];
+        return $paths;
     }
 }

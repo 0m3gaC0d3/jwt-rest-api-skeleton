@@ -5,7 +5,7 @@ services:
     public: true
   OmegaCode\JwtSecuredApiCore\:
     resource: '../src/*'
-    exclude: '../src/{Config,Middleware,Factory,Kernel.php,Router.php,Constants.php}'
+    exclude: '../src/{Error,Configuration,Factory,Extension,Event,Collection,Route,Kernel.php,Constants.php}'
 
   OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth:
     arguments:
@@ -13,3 +13,12 @@ services:
       $lifetime: '%env(int:JWT_LIFETIME)%'
       $privateKeyPath: '%env(string:PRIVATE_KEY_PATH)%'
       $publicKeyPath: '%env(string:PUBLIC_KEY_PATH)%'
+
+  Symfony\Component\EventDispatcher\EventDispatcher:
+    public: true
+
+  Slim\App:
+    synthetic: true
+
+  Monolog\Logger:
+    synthetic: true

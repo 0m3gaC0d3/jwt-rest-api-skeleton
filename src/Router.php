@@ -28,27 +28,24 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use Exception;
-use InvalidArgumentException;
-use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
+use OmegaCode\JwtSecuredApiCore\Configuration\Processor\RouteConfigurationProcessor;
+use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
+use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
+use OmegaCode\JwtSecuredApiCore\Event\RouteCollectionFilledEvent;
+use OmegaCode\JwtSecuredApiCore\Factory\Route\CollectionFactory;
+use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App as API;
 use Slim\Interfaces\RouteInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Router
 {
-    private const ALLOWED_METHODS = [
-        'get',
-        'post',
-        'put',
-        'delete',
-        'patch',
-    ];
+    public const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch'];
 
     private API $api;
 
@@ -56,48 +53,65 @@ class Router
 
     private JsonWebTokenAuth $auth;
 
+    private EventDispatcher $eventDispatcher;
+
     public function __construct(
         API $api,
         ConfigurationFileService $configurationFileService,
-        JsonWebTokenAuth $auth
+        JsonWebTokenAuth $auth,
+        EventDispatcher $eventDispatcher
     ) {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
         $this->auth = $auth;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function registerRoutes(ContainerInterface $container): void
     {
-        $routesConfiguration = $this->configurationFileService->load('routes.yaml')['routes'];
-        foreach ($routesConfiguration as $group) {
-            foreach ($group as $name => $configuration) {
-                $actionClass = trim($configuration['action']);
-                $route = trim($configuration['route']);
-                $method = strtolower(trim($configuration['method']));
-                $protected = (bool) $configuration['protected'];
-                if (!$container->has($actionClass)) {
-                    throw new Exception("Could not find controller service with id: $actionClass");
-                }
-                $action = $container->get($actionClass);
-                $this->handleRequest($method, $route, $action, $protected);
-            }
+        $configuration = $this->configurationFileService->load('routes.yaml');
+        $routeCollection = CollectionFactory::build(
+            $container,
+            (new RouteConfigurationProcessor())->process($configuration)
+        );
+        $this->eventDispatcher->dispatch(
+            new RouteCollectionFilledEvent($routeCollection),
+            RouteCollectionFilledEvent::NAME
+        );
+        foreach ($routeCollection as $routeConfig) {
+            $this->handleRequest($routeConfig);
         }
     }
 
-    private function handleRequest(string $method, string $route, AbstractAction $action, bool $protected): void
+    private function handleRequest(Configuration $config): void
     {
-        if (!in_array($method, self::ALLOWED_METHODS)) {
-            throw new InvalidArgumentException("Method $method is not allowed");
+        /** @var string $method */
+        foreach ($config->getAllowedMethods() as $method) {
+            $action = $config->getAction();
+            $eventDispatcher = $this->eventDispatcher;
+            /** @var RouteInterface $router */
+            $router = $this->api->$method(
+                $config->getRoute(),
+                function (Request $request, Response $response) use ($action, $eventDispatcher) {
+                    $eventDispatcher->dispatch(new PreRequestEvent($request, $response), PreRequestEvent::NAME);
+                    $response = $action($request, $response);
+                    $eventDispatcher->dispatch(new PostRequestEvent($request, $response), PostRequestEvent::NAME);
+
+                    return $response;
+                }
+            );
+            $this->addMiddlewares($router, $config->getMiddlewares());
         }
-        /** @var RouteInterface $router */
-        $router = $this->api->$method(
-            $route,
-            function (Request $request, Response $response) use ($action) {
-                return $action($request, $response);
-            }
-        );
-        if ($protected) {
-            $router->addMiddleware(new JsonWebTokenMiddleware($this->auth, $this->api->getResponseFactory()));
+    }
+
+    private function addMiddlewares(RouteInterface $router, array $middlewares): void
+    {
+        if (count($middlewares) === 0) {
+            return;
+        }
+        /** @var string $middleware */
+        foreach ($middlewares as $middleware) {
+            $router->add($middleware);
         }
     }
 }

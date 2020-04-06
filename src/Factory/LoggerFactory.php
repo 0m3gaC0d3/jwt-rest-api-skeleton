@@ -24,36 +24,23 @@
  * SOFTWARE.
  */
 
-namespace OmegaCode\JwtSecuredApiCore\Config\Loader;
+declare(strict_types=1);
 
-use Symfony\Component\Config\Loader\FileLoader;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Yaml\Yaml;
+namespace OmegaCode\JwtSecuredApiCore\Factory;
 
-class YamlRoutesLoader extends FileLoader
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
+
+class LoggerFactory
 {
-    /**
-     * @param mixed $resource
-     *
-     * @return mixed
-     */
-    public function load($resource, string $type = null)
-    {
-        if (!file_exists($resource)) {
-            throw new IOException("File $resource does not exist");
-        }
-        $fileContent = file_get_contents($resource);
-        if (is_string($fileContent) && !empty($fileContent)) {
-            return Yaml::parse($fileContent);
-        }
-        throw new IOException("Could not read file $resource");
-    }
+    private const LOG_FILE_NAME = 'api.log';
 
-    /**
-     * {@inheritdoc}
-     */
-    public function supports($resource, string $type = null): bool
+    public static function build(): LoggerInterface
     {
-        return is_string($resource) && pathinfo($resource, PATHINFO_EXTENSION) === 'yaml';
+        $logger = new Logger('API');
+        $logger->pushHandler(new StreamHandler(APP_ROOT_PATH . 'var/log/' . static::LOG_FILE_NAME, Logger::DEBUG));
+
+        return $logger;
     }
 }
