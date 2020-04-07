@@ -26,38 +26,16 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Generator;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\App as API;
-use Slim\Exception\HttpUnauthorizedException;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+class RequestIDGenerator
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
-
-    private API $api;
-
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public static function generate(ServerRequestInterface $request): string
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
-        $this->api = $api;
-    }
+        $identifier = md5(serialize($request->getParsedBody()));
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            throw new HttpUnauthorizedException($request);
-        }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
-
-        return $handler->handle($request);
+        return $identifier;
     }
 }

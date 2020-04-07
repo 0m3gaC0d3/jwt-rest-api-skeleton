@@ -22,3 +22,6 @@ services:
 
   Monolog\Logger:
     synthetic: true
+
+  OmegaCode\JwtSecuredApiCore\Cache\CacheInterface:
+    class: OmegaCode\JwtSecuredApiCore\Cache\FileBasedCache

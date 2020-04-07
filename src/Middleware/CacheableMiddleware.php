@@ -28,35 +28,39 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Cache\CacheInterface;
+use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\App as API;
-use Slim\Exception\HttpUnauthorizedException;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+class CacheableMiddleware implements MiddlewareInterface
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
+    protected CacheInterface $cache;
 
-    private API $api;
+    protected API $api;
 
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public function __construct(CacheInterface $cache, API $api)
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
+        $this->cache = $cache;
         $this->api = $api;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            throw new HttpUnauthorizedException($request);
+        if (!(bool) $_ENV['ENABLE_REQUEST_CACHE']) {
+            return $handler->handle($request);
         }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
+        $identifier = RequestIDGenerator::generate($request);
+        if ($this->cache->has($identifier)) {
+            $response = $this->api->getResponseFactory()->createResponse();
+            $response->getBody()->write($this->cache->get($identifier));
+            $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
+
+            return $response;
+        }
 
         return $handler->handle($request);
     }

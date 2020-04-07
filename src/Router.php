@@ -29,11 +29,13 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore;
 
 use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Cache\CacheInterface;
 use OmegaCode\JwtSecuredApiCore\Configuration\Processor\RouteConfigurationProcessor;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Event\RouteCollectionFilledEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\Route\CollectionFactory;
+use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Psr\Container\ContainerInterface;
@@ -55,16 +57,20 @@ class Router
 
     private EventDispatcher $eventDispatcher;
 
+    private CacheInterface $cache;
+
     public function __construct(
         API $api,
         ConfigurationFileService $configurationFileService,
         JsonWebTokenAuth $auth,
-        EventDispatcher $eventDispatcher
+        EventDispatcher $eventDispatcher,
+        CacheInterface $cache
     ) {
         $this->api = $api;
         $this->configurationFileService = $configurationFileService;
         $this->auth = $auth;
         $this->eventDispatcher = $eventDispatcher;
+        $this->cache = $cache;
     }
 
     public function registerRoutes(ContainerInterface $container): void
@@ -79,29 +85,41 @@ class Router
             RouteCollectionFilledEvent::NAME
         );
         foreach ($routeCollection as $routeConfig) {
-            $this->handleRequest($routeConfig);
+            $this->handleRoutes($routeConfig);
         }
     }
 
-    private function handleRequest(Configuration $config): void
+    private function handleRoutes(Configuration $config): void
     {
         /** @var string $method */
         foreach ($config->getAllowedMethods() as $method) {
-            $action = $config->getAction();
-            $eventDispatcher = $this->eventDispatcher;
-            /** @var RouteInterface $router */
-            $router = $this->api->$method(
-                $config->getRoute(),
-                function (Request $request, Response $response) use ($action, $eventDispatcher) {
-                    $eventDispatcher->dispatch(new PreRequestEvent($request, $response), PreRequestEvent::NAME);
-                    $response = $action($request, $response);
-                    $eventDispatcher->dispatch(new PostRequestEvent($request, $response), PostRequestEvent::NAME);
-
-                    return $response;
-                }
-            );
-            $this->addMiddlewares($router, $config->getMiddlewares());
+            $this->addRoute($method, $config, $this->eventDispatcher, $this->cache);
         }
+    }
+
+    private function addRoute(
+        string $method,
+        Configuration $config,
+        EventDispatcher $eventDispatcher,
+        CacheInterface $cache
+    ): void {
+        $action = $config->getAction();
+        /** @var RouteInterface $router */
+        $router = $this->api->$method(
+            $config->getRoute(),
+            function (Request $request, Response $response) use ($action, $eventDispatcher, $cache) {
+                $eventDispatcher->dispatch(new PreRequestEvent($request, $response), PreRequestEvent::NAME);
+                $response = $action($request, $response);
+                $eventDispatcher->dispatch(new PostRequestEvent($request, $response), PostRequestEvent::NAME);
+                $identifier = RequestIDGenerator::generate($request);
+                if ((bool) $_ENV['ENABLE_REQUEST_CACHE'] && $response->getStatusCode() === 200) {
+                    $cache->set($identifier, (string) $response->getBody());
+                }
+
+                return $response;
+            }
+        );
+        $this->addMiddlewares($router, array_reverse($config->getMiddlewares()));
     }
 
     private function addMiddlewares(RouteInterface $router, array $middlewares): void
