@@ -26,36 +26,10 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Generator;
+namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
-class RequestIDGenerator
+interface CacheableMiddlewareInterface extends MiddlewareInterface
 {
-    public const PREFIX = 'request.';
-
-    public static function generate(ServerRequestInterface $request): string
-    {
-        $serializedClaims = serialize(self::getIDClaims($request));
-        $identifier = static::PREFIX . md5(self::removeSpacesAndLowerCaseClaim($serializedClaims));
-
-        return $identifier;
-    }
-
-    private static function getIDClaims(ServerRequestInterface $request): array
-    {
-        if ($request->getMethod() === 'GET') {
-            return ['target' => $request->getRequestTarget()];
-        }
-
-        return [
-            'target' => $request->getRequestTarget(),
-            'payload' => $request->getParsedBody(),
-        ];
-    }
-
-    private static function removeSpacesAndLowerCaseClaim(string $serializedClaim): string
-    {
-        return str_replace(["\t", "\n", ' '], '', strtolower($serializedClaim));
-    }
 }

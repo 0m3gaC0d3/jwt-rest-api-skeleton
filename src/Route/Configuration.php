@@ -29,6 +29,7 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Route;
 
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
+use OmegaCode\JwtSecuredApiCore\Middleware\CacheableMiddlewareInterface;
 
 class Configuration
 {
@@ -94,5 +95,17 @@ class Configuration
     public function setMiddlewares(array $middlewares): void
     {
         $this->middlewares = $middlewares;
+    }
+
+    public function isCacheable(): bool
+    {
+        foreach ($this->middlewares as $middleware) {
+            $interfaces = class_implements($middleware);
+            if (isset($interfaces[CacheableMiddlewareInterface::class])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

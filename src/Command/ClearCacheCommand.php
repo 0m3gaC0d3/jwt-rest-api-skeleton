@@ -26,17 +26,25 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Cache;
+namespace OmegaCode\JwtSecuredApiCore\Command;
 
-interface CacheInterface
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class ClearCacheCommand extends Command
 {
-    public function set(string $identifier, string $content): void;
+    protected static $defaultName = 'cache:clear';
 
-    public function get(string $identifier): string;
+    protected function configure()
+    {
+        $this->setDescription('Clears the application cache');
+    }
 
-    public function has(string $identifier): bool;
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $output->writeln('cleared the cache!');
 
-    public function remove(string $identifier): void;
-
-    public function flush(): void;
+        return 0;
+    }
 }

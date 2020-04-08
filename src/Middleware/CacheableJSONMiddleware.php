@@ -26,36 +26,42 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Generator;
+namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
+use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Slim\App as API;
+use Symfony\Component\Cache\Adapter\AbstractAdapter;
 
-class RequestIDGenerator
+class CacheableJSONMiddleware implements CacheableMiddlewareInterface
 {
-    public const PREFIX = 'request.';
+    protected AbstractAdapter $cache;
 
-    public static function generate(ServerRequestInterface $request): string
+    protected API $api;
+
+    public function __construct(AbstractAdapter $cache, API $api)
     {
-        $serializedClaims = serialize(self::getIDClaims($request));
-        $identifier = static::PREFIX . md5(self::removeSpacesAndLowerCaseClaim($serializedClaims));
-
-        return $identifier;
+        $this->cache = $cache;
+        $this->api = $api;
     }
 
-    private static function getIDClaims(ServerRequestInterface $request): array
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($request->getMethod() === 'GET') {
-            return ['target' => $request->getRequestTarget()];
+        if (!(bool) $_ENV['ENABLE_REQUEST_CACHE']) {
+            return $handler->handle($request);
+        }
+        $identifier = static::CACHE_PREFIX . RequestIDGenerator::generate($request);
+        $item = $this->cache->getItem($identifier);
+        if ($item->isHit()) {
+            $response = $this->api->getResponseFactory()->createResponse();
+            $response->getBody()->write($item->get());
+            $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
+
+            return $response;
         }
 
-        return [
-            'target' => $request->getRequestTarget(),
-            'payload' => $request->getParsedBody(),
-        ];
-    }
-
-    private static function removeSpacesAndLowerCaseClaim(string $serializedClaim): string
-    {
-        return str_replace(["\t", "\n", ' '], '', strtolower($serializedClaim));
+        return $handler->handle($request);
     }
 }

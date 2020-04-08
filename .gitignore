@@ -6,6 +6,7 @@ keys/*
 !keys/.gitkeep
 bin/*
 !bin/.gitkeep
+!bin/console
 .phpunit.result.cache
 .database/
 .idea/

@@ -23,5 +23,5 @@ services:
   Monolog\Logger:
     synthetic: true
 
-  OmegaCode\JwtSecuredApiCore\Cache\CacheInterface:
-    class: OmegaCode\JwtSecuredApiCore\Cache\FileBasedCache
+  Symfony\Component\Cache\Adapter\AbstractAdapter:
+    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
