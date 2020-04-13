@@ -26,20 +26,28 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Factory\Route;
+namespace OmegaCode\JwtSecuredApiCore\Core\Kernel;
 
-use OmegaCode\JwtSecuredApiCore\Collection\RouteCollection;
+use Exception;
 
-class CollectionFactory
+class CliKernel extends AbstractKernel
 {
-    public static function build(array $routesConfiguration): RouteCollection
+    public function __construct()
     {
-        $routeCollection = new RouteCollection();
-        foreach ($routesConfiguration as $configuration) {
-            $routeConfig = ConfigurationFactory::build($configuration);
-            $routeCollection->add($routeConfig);
+        if (php_sapi_name() != 'cli') {
+            throw new Exception('This kernel is for cli use only.');
         }
+        if (!defined('APP_ROOT_PATH')) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo 'Environment variable APP_ROOT_PATH is not set! CLI can not process.';
+            die();
+        }
+        parent::__construct();
+    }
 
-        return $routeCollection;
+    public function run(): void
+    {
+        // Ignore route setup cause we are on cli.
     }
 }

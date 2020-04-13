@@ -31,7 +31,7 @@ namespace OmegaCode\JwtSecuredApiCore\Collection;
 use InvalidArgumentException;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 
-class RouteCollection extends AbstractRouteCollection
+class RouteCollection extends AbstractRouteCollection implements \Serializable
 {
     public function add(Configuration $routeConfig): void
     {
@@ -66,6 +66,19 @@ class RouteCollection extends AbstractRouteCollection
         }
 
         return null;
+    }
+
+    public function serialize(): string
+    {
+        return serialize($this->values);
+    }
+
+    /**
+     * @param string $data
+     */
+    public function unserialize($data): void
+    {
+        $this->values = unserialize($data);
     }
 
     protected function validateConfig(Configuration $config): void

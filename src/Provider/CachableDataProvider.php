@@ -26,43 +26,34 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Provider;
 
 use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
-use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\App as API;
 use Symfony\Component\Cache\Adapter\AbstractAdapter;
 
-class CacheableHTMLMiddleware implements CacheableMiddlewareInterface
+abstract class CachableDataProvider
 {
     protected AbstractAdapter $cache;
 
-    protected API $api;
-
-    public function __construct(API $api)
+    public function __construct()
     {
-        $this->cache = CacheAdapterFactory::build();
-        $this->api = $api;
+        $this->initialize();
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    /**
+     * @return mixed
+     */
+    abstract public function getData();
+
+    abstract public function getCacheIdentifier(): string;
+
+    protected function initialize(): void
     {
-        if (!(bool) $_ENV['ENABLE_REQUEST_CACHE']) {
-            return $handler->handle($request);
-        }
-        $identifier = RequestIDGenerator::generate($request);
-        $item = $this->cache->getItem($identifier);
-        if ($item->isHit()) {
-            $response = $this->api->getResponseFactory()->createResponse();
-            $response->getBody()->write($item->get());
-            $response = $response->withStatus(200)->withHeader('Content-type', 'text/html');
+        $this->cache = CacheAdapterFactory::build();
+    }
 
-            return $response;
-        }
-
-        return $handler->handle($request);
+    protected function cachingIsEnabled(): bool
+    {
+        return (bool) $_ENV['ENABLE_SYSTEM_CACHE'];
     }
 }

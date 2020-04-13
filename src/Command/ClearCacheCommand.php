@@ -28,22 +28,37 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Command;
 
+use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
+use Symfony\Component\Cache\Adapter\AbstractAdapter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * TODO add options to define caches to clear.
+ */
 class ClearCacheCommand extends Command
 {
     protected static $defaultName = 'cache:clear';
 
-    protected function configure()
+    private AbstractAdapter $cache;
+
+    public function __construct()
+    {
+        $this->cache = CacheAdapterFactory::build();
+        parent::__construct();
+    }
+
+    protected function configure(): void
     {
         $this->setDescription('Clears the application cache');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('cleared the cache!');
+        $this->cache->clear('app.configuration');
+        $this->cache->clear('request');
+        $output->writeln('Successfully cleared all available caches!');
 
         return 0;
     }

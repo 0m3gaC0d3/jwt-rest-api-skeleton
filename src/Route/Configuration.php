@@ -28,14 +28,13 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Route;
 
-use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Middleware\CacheableMiddlewareInterface;
 
-class Configuration
+class Configuration implements \Serializable
 {
     private string $name;
 
-    private AbstractAction $action;
+    private string $action;
 
     private string $route;
 
@@ -45,7 +44,7 @@ class Configuration
 
     public function __construct(
         string $name,
-        AbstractAction $action,
+        string $action,
         string $route,
         array $allowedMethods,
         array $middlewares
@@ -62,12 +61,12 @@ class Configuration
         return $this->name;
     }
 
-    public function getAction(): AbstractAction
+    public function getAction(): string
     {
         return $this->action;
     }
 
-    public function setAction(AbstractAction $action): void
+    public function setAction(string $action): void
     {
         $this->action = $action;
     }
@@ -107,5 +106,29 @@ class Configuration
         }
 
         return false;
+    }
+
+    public function serialize(): string
+    {
+        return serialize([
+            $this->name,
+            $this->action,
+            $this->route,
+            $this->allowedMethods,
+            $this->middlewares,
+        ]);
+    }
+
+    /**
+     * @param string $data
+     */
+    public function unserialize($data): void
+    {
+        $data = unserialize($data);
+        $this->name = $data[0];
+        $this->action = $data[1];
+        $this->route = $data[2];
+        $this->allowedMethods = $data[3];
+        $this->middlewares = $data[4];
     }
 }

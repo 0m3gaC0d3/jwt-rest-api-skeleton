@@ -28,13 +28,10 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use OmegaCode\JwtSecuredApiCore\Configuration\Processor\RouteConfigurationProcessor;
 use OmegaCode\JwtSecuredApiCore\Core\Api;
 use OmegaCode\JwtSecuredApiCore\Event\RouteCollectionFilledEvent;
-use OmegaCode\JwtSecuredApiCore\Factory\Route\CollectionFactory;
+use OmegaCode\JwtSecuredApiCore\Provider\RouteCollectionProvider;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
-use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Router
@@ -43,27 +40,23 @@ class Router
 
     private Api $api;
 
-    private ConfigurationFileService $configurationFileService;
+    private RouteCollectionProvider $routeCollectionProvider;
 
     private EventDispatcher $eventDispatcher;
 
     public function __construct(
         Api $api,
-        ConfigurationFileService $configurationFileService,
+        RouteCollectionProvider $routeCollectionProvider,
         EventDispatcher $eventDispatcher
     ) {
         $this->api = $api;
-        $this->configurationFileService = $configurationFileService;
+        $this->routeCollectionProvider = $routeCollectionProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function registerRoutes(ContainerInterface $container): void
+    public function registerRoutes(): void
     {
-        $configuration = $this->configurationFileService->load('routes.yaml');
-        $routeCollection = CollectionFactory::build(
-            $container,
-            (new RouteConfigurationProcessor())->process($configuration)
-        );
+        $routeCollection = $this->routeCollectionProvider->getData();
         $this->eventDispatcher->dispatch(
             new RouteCollectionFilledEvent($routeCollection),
             RouteCollectionFilledEvent::NAME

@@ -28,20 +28,14 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Factory\Route;
 
-use Exception;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
-use Psr\Container\ContainerInterface;
 
 class ConfigurationFactory
 {
-    public static function build(ContainerInterface $container, array $configuration): Configuration
+    public static function build(array $configuration): Configuration
     {
-        $service = trim((string) $configuration['action']);
-        if (!$container->has($service)) {
-            throw new Exception("Could not find controller service with id: $service");
-        }
         $name = trim((string) $configuration['name']);
-        $action = $container->get($service);
+        $action = trim((string) $configuration['action']);
         $route = trim((string) $configuration['route']);
         $methods = (array) $configuration['methods'];
         $middlewares = (array) ($configuration['middlewares'] ?? []);

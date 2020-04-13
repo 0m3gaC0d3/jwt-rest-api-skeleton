@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
+use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -41,9 +42,9 @@ class CacheableJSONMiddleware implements CacheableMiddlewareInterface
 
     protected API $api;
 
-    public function __construct(AbstractAdapter $cache, API $api)
+    public function __construct(API $api)
     {
-        $this->cache = $cache;
+        $this->cache = CacheAdapterFactory::build();
         $this->api = $api;
     }
 
@@ -52,7 +53,7 @@ class CacheableJSONMiddleware implements CacheableMiddlewareInterface
         if (!(bool) $_ENV['ENABLE_REQUEST_CACHE']) {
             return $handler->handle($request);
         }
-        $identifier = static::CACHE_PREFIX . RequestIDGenerator::generate($request);
+        $identifier = RequestIDGenerator::generate($request);
         $item = $this->cache->getItem($identifier);
         if ($item->isHit()) {
             $response = $this->api->getResponseFactory()->createResponse();

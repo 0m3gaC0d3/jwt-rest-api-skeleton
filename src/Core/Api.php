@@ -28,10 +28,14 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Core;
 
+use Exception;
+use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
+use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -47,16 +51,22 @@ class Api
 
     protected AbstractAdapter $cache;
 
-    public function __construct(App $slimApp, EventDispatcher $eventDispatcher, AbstractAdapter $cache)
-    {
+    protected ContainerInterface $container;
+
+    public function __construct(
+        App $slimApp,
+        EventDispatcher $eventDispatcher,
+        ContainerInterface $container
+    ) {
         $this->slimApp = $slimApp;
         $this->eventDispatcher = $eventDispatcher;
-        $this->cache = $cache;
+        $this->cache = CacheAdapterFactory::build();
+        $this->container = $container;
     }
 
     public function addRoute(string $method, Configuration $config): void
     {
-        $action = $config->getAction();
+        $action = $this->getActionService($config->getAction());
         $eventDispatcher = $this->eventDispatcher;
         $cache = $this->cache;
         $cacheEnabled = (bool) $_ENV['ENABLE_REQUEST_CACHE'] && $config->isCacheable();
@@ -90,5 +100,15 @@ class Api
         foreach ($middlewares as $middleware) {
             $router->add($middleware);
         }
+    }
+
+    private function getActionService(string $serviceId): AbstractAction
+    {
+        $service = trim((string) $serviceId);
+        if (!$this->container->has($service)) {
+            throw new Exception("Could not find controller service with id: $service");
+        }
+
+        return $this->container->get($serviceId);
     }
 }

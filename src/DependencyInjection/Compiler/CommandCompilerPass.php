@@ -26,36 +26,29 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Factory;
+namespace OmegaCode\JwtSecuredApiCore\DependencyInjection\Compiler;
 
-use OmegaCode\JwtSecuredApiCore\Constants;
-use Symfony\Component\Config\FileLocator;
+use OmegaCode\JwtSecuredApiCore\Service\CommandChainService;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
-final class ContainerFactory
+class CommandCompilerPass implements CompilerPassInterface
 {
-    private const CONFIGURATION_FILE_NAME = 'services.yaml';
+    private const TAG = 'console.command';
 
-    /**
-     * @param string[] $additionalConfigurationFiles
-     */
-    public static function build(array $additionalConfigurationFiles): ContainerBuilder
+    public function process(ContainerBuilder $container): void
     {
-        $containerBuilder = new ContainerBuilder();
-        $containerBuilder->addCompilerPass(new RegisterListenersPass(EventDispatcher::class));
-        $containerBuilder->register(EventDispatcher::class, EventDispatcher::class);
-        $configurationFiles = array_merge([realpath(Constants::CONF_ROOT_PATH)], $additionalConfigurationFiles);
-        /** @var string $resource */
-        foreach ($configurationFiles as $resource) {
-            $loader = new YamlFileLoader($containerBuilder, new FileLocator($resource));
-            if (file_exists($resource . '/' . self::CONFIGURATION_FILE_NAME)) {
-                $loader->load(self::CONFIGURATION_FILE_NAME);
-            }
+        if (!$container->has(CommandChainService::class)) {
+            return;
         }
-
-        return $containerBuilder;
+        $definition = $container->findDefinition(CommandChainService::class);
+        $taggedServices = $container->findTaggedServiceIds(self::TAG);
+        foreach ($taggedServices as $id => $tags) {
+            $command = $tags[0]['command'] ?? null;
+            if (empty($command)) {
+                continue;
+            }
+            $definition->addMethodCall('addCommandService', [$id, $command]);
+        }
     }
 }

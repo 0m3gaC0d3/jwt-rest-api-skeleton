@@ -26,20 +26,19 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Factory\Route;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use OmegaCode\JwtSecuredApiCore\Collection\RouteCollection;
-
-class CollectionFactory
+class CommandChainService
 {
-    public static function build(array $routesConfiguration): RouteCollection
-    {
-        $routeCollection = new RouteCollection();
-        foreach ($routesConfiguration as $configuration) {
-            $routeConfig = ConfigurationFactory::build($configuration);
-            $routeCollection->add($routeConfig);
-        }
+    protected array $commandInfo = [];
 
-        return $routeCollection;
+    public function addCommandService(string $id, string $command): void
+    {
+        $this->commandInfo[$command] = $id;
+    }
+
+    public function getCommandInfo(): array
+    {
+        return $this->commandInfo;
     }
 }

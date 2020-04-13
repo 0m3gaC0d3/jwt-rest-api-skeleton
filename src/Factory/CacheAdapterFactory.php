@@ -26,18 +26,27 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+namespace OmegaCode\JwtSecuredApiCore\Factory;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
+use Exception;
+use RuntimeException;
+use Symfony\Component\Cache\Adapter\AbstractAdapter;
 
-abstract class KernelExtension
+class CacheAdapterFactory
 {
-    private Kernel $coreKernel;
-
-    public function setCoreKernel(Kernel $coreKernel): void
+    public static function build(): AbstractAdapter
     {
-        $this->coreKernel = $coreKernel;
-    }
+        $cache = null;
+        try {
+            /** @var AbstractAdapter $cache */
+            $cache = new $_ENV['CACHE_ADAPATER_CLASS']();
+        } catch (Exception $exception) {
+            throw new RuntimeException('Could not instantiate cache adapter class. check your .env file.');
+        }
+        if (!$cache instanceof AbstractAdapter) {
+            throw new RuntimeException('The given adapter is not of type ' . AbstractAdapter::class);
+        }
 
-    abstract public function getConfigDirectory(): string;
+        return $cache;
+    }
 }
