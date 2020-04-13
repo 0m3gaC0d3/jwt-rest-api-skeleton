@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+declare(strict_types=1);
+
 namespace OmegaCode\JwtSecuredApiCore\Action;
 
 use Psr\Http\Message\ResponseInterface as Response;

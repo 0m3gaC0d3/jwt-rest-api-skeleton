@@ -28,25 +28,35 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
+use OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
 
 class ConsumerValidationService
 {
+    private LoggerInterface $logger;
+
+    public function __construct()
+    {
+        $this->logger = LoggerFactory::build();
+    }
+
     public function isValid(Request $request): bool
     {
         $requestClientId = $this->getRequestClientId($request);
         $clientConfiguration = (array) explode(',', $_ENV['CLIENT_IDS']);
         if (count($clientConfiguration) === 0) {
-            // todo: log no clients available
+            $this->logger->warning('Currently there is no valid client id defined! Auth wont work.');
+
             return false;
         }
         foreach ($clientConfiguration as $allowedClientId) {
             if ($requestClientId === $allowedClientId) {
-                // todo: log valid client id
                 return true;
             }
         }
-        // todo: log invalid client id
+        $this->logger->warning('An invalid client id tried to connect to auth.');
+
         return false;
     }
 

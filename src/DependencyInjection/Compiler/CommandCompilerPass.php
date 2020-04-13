@@ -26,18 +26,29 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Extension;
+namespace OmegaCode\JwtSecuredApiCore\DependencyInjection\Compiler;
 
-use OmegaCode\JwtSecuredApiCore\Kernel;
+use OmegaCode\JwtSecuredApiCore\Service\CommandChainService;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-abstract class KernelExtension
+class CommandCompilerPass implements CompilerPassInterface
 {
-    private Kernel $coreKernel;
+    private const TAG = 'console.command';
 
-    public function setCoreKernel(Kernel $coreKernel): void
+    public function process(ContainerBuilder $container): void
     {
-        $this->coreKernel = $coreKernel;
+        if (!$container->has(CommandChainService::class)) {
+            return;
+        }
+        $definition = $container->findDefinition(CommandChainService::class);
+        $taggedServices = $container->findTaggedServiceIds(self::TAG);
+        foreach ($taggedServices as $id => $tags) {
+            $command = $tags[0]['command'] ?? null;
+            if (empty($command)) {
+                continue;
+            }
+            $definition->addMethodCall('addCommandService', [$id, $command]);
+        }
     }
-
-    abstract public function getConfigDirectory(): string;
 }

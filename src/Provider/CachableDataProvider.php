@@ -26,38 +26,34 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Provider;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\App as API;
-use Slim\Exception\HttpUnauthorizedException;
+use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
+use Symfony\Component\Cache\Adapter\AbstractAdapter;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+abstract class CachableDataProvider
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
+    protected AbstractAdapter $cache;
 
-    private API $api;
-
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public function __construct()
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
-        $this->api = $api;
+        $this->initialize();
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            throw new HttpUnauthorizedException($request);
-        }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
+    /**
+     * @return mixed
+     */
+    abstract public function getData();
 
-        return $handler->handle($request);
+    abstract public function getCacheIdentifier(): string;
+
+    protected function initialize(): void
+    {
+        $this->cache = CacheAdapterFactory::build();
+    }
+
+    protected function cachingIsEnabled(): bool
+    {
+        return (bool) $_ENV['ENABLE_SYSTEM_CACHE'];
     }
 }

@@ -26,38 +26,36 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Generator;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\App as API;
-use Slim\Exception\HttpUnauthorizedException;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+class RequestIDGenerator
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
+    public const PREFIX = 'request.';
 
-    private API $api;
-
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public static function generate(ServerRequestInterface $request): string
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
-        $this->api = $api;
+        $serializedClaims = serialize(self::getIDClaims($request));
+        $identifier = static::PREFIX . md5(self::removeSpacesAndLowerCaseClaim($serializedClaims));
+
+        return $identifier;
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    private static function getIDClaims(ServerRequestInterface $request): array
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            throw new HttpUnauthorizedException($request);
+        if ($request->getMethod() === 'GET') {
+            return ['target' => $request->getRequestTarget()];
         }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
 
-        return $handler->handle($request);
+        return [
+            'target' => $request->getRequestTarget(),
+            'payload' => $request->getParsedBody(),
+        ];
+    }
+
+    private static function removeSpacesAndLowerCaseClaim(string $serializedClaim): string
+    {
+        return str_replace(["\t", "\n", ' '], '', strtolower($serializedClaim));
     }
 }

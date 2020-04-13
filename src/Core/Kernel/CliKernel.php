@@ -26,38 +26,28 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Middleware;
+namespace OmegaCode\JwtSecuredApiCore\Core\Kernel;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\App as API;
-use Slim\Exception\HttpUnauthorizedException;
+use Exception;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+class CliKernel extends AbstractKernel
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
-
-    private API $api;
-
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public function __construct()
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
-        $this->api = $api;
+        if (php_sapi_name() != 'cli') {
+            throw new Exception('This kernel is for cli use only.');
+        }
+        if (!defined('APP_ROOT_PATH')) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo 'Environment variable APP_ROOT_PATH is not set! CLI can not process.';
+            die();
+        }
+        parent::__construct();
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function run(): void
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            throw new HttpUnauthorizedException($request);
-        }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
-
-        return $handler->handle($request);
+        // Ignore route setup cause we are on cli.
     }
 }

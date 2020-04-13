@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 /**
@@ -26,20 +27,31 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Factory\Route;
+use Symfony\Component\Console\Application;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-use OmegaCode\JwtSecuredApiCore\Collection\RouteCollection;
+(function () {
+    require __DIR__ . '/../../../vendor/autoload.php';
 
-class CollectionFactory
-{
-    public static function build(array $routesConfiguration): RouteCollection
-    {
-        $routeCollection = new RouteCollection();
-        foreach ($routesConfiguration as $configuration) {
-            $routeConfig = ConfigurationFactory::build($configuration);
-            $routeCollection->add($routeConfig);
-        }
+    (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/../../../.env');
 
-        return $routeCollection;
-    }
-}
+    define('APP_ROOT_PATH', dirname(__DIR__, 3) . '/');
+
+    $kernel = new \OmegaCode\JwtSecuredApiCore\Core\Kernel\CliKernel();
+    $kernel->run();
+
+    $dispatcher = new EventDispatcher();
+
+    /** @var \OmegaCode\JwtSecuredApiCore\Service\CommandChainService $commandChain */
+    $commandChain = $kernel->getContainer()->get(\OmegaCode\JwtSecuredApiCore\Service\CommandChainService::class);
+
+    $commandLoader = new \Symfony\Component\Console\CommandLoader\ContainerCommandLoader(
+        $kernel->getContainer(),
+        $commandChain->getCommandInfo()
+    );
+
+    $application = new Application();
+    $application->setDispatcher($dispatcher);
+    $application->setCommandLoader($commandLoader);
+    $application->run();
+})();

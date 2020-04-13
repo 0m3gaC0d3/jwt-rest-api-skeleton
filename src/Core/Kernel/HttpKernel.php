@@ -26,32 +26,23 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore;
+namespace OmegaCode\JwtSecuredApiCore\Core\Kernel;
 
 use OmegaCode\JwtSecuredApiCore\Error\AbstractErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Event\Kernel\PostKernelInitializationEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Kernel\PreKernelInitializationEvent;
-use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
 use OmegaCode\JwtSecuredApiCore\Factory\ApiFactory;
-use OmegaCode\JwtSecuredApiCore\Factory\ContainerFactory;
 use OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory;
+use OmegaCode\JwtSecuredApiCore\Router;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
 use Psr\Log\LoggerInterface;
 use Slim\App as API;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class Kernel
+class HttpKernel extends AbstractKernel
 {
-    protected ContainerBuilder $container;
-
     protected API $api;
-
-    /**
-     * @var KernelExtension[]
-     */
-    protected array $extensions = [];
 
     private LoggerInterface $logger;
 
@@ -65,22 +56,11 @@ class Kernel
             die();
         }
         (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], false));
-    }
-
-    public function addKernelExtension(KernelExtension $extension): void
-    {
-        $extension->setCoreKernel($this);
-        $this->extensions[get_class($extension)] = $extension;
-    }
-
-    public function getExtensions(): array
-    {
-        return $this->extensions;
+        parent::__construct();
     }
 
     public function run(): void
     {
-        $this->initialize();
         /** @var EventDispatcher $eventDispatcher */
         $eventDispatcher = $this->container->get(EventDispatcher::class);
         $eventDispatcher->dispatch(
@@ -89,10 +69,10 @@ class Kernel
         );
         /** @var ConfigurationFileService $configurationFileService */
         $configurationFileService = $this->container->get(ConfigurationFileService::class);
-        $configurationFileService->setKernel($this);
+        $configurationFileService->addConfigurationDirectories($this->additionalConfigurationDirectories);
         /** @var Router $router */
         $router = $this->container->get(Router::class);
-        $router->registerRoutes($this->container);
+        $router->registerRoutes();
         $eventDispatcher->dispatch(
             new PostKernelInitializationEvent($this->api),
             PostKernelInitializationEvent::NAME
@@ -102,8 +82,7 @@ class Kernel
 
     protected function initialize(): void
     {
-        $this->container = ContainerFactory::build($this);
-        $this->container->compile(true);
+        parent::initialize();
         $this->logger = LoggerFactory::build();
         $this->api = ApiFactory::build($this->container, $this->logger);
         $this->container->set(get_class($this->logger), $this->logger);

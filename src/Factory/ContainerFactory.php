@@ -29,8 +29,6 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Factory;
 
 use OmegaCode\JwtSecuredApiCore\Constants;
-use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
-use OmegaCode\JwtSecuredApiCore\Kernel;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -41,12 +39,17 @@ final class ContainerFactory
 {
     private const CONFIGURATION_FILE_NAME = 'services.yaml';
 
-    public static function build(Kernel $kernel): ContainerBuilder
+    /**
+     * @param string[] $additionalConfigurationFiles
+     */
+    public static function build(array $additionalConfigurationFiles): ContainerBuilder
     {
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->addCompilerPass(new RegisterListenersPass(EventDispatcher::class));
         $containerBuilder->register(EventDispatcher::class, EventDispatcher::class);
-        foreach (static::getConfigurationFileDirectories($kernel) as $resource) {
+        $configurationFiles = array_merge([realpath(Constants::CONF_ROOT_PATH)], $additionalConfigurationFiles);
+        /** @var string $resource */
+        foreach ($configurationFiles as $resource) {
             $loader = new YamlFileLoader($containerBuilder, new FileLocator($resource));
             if (file_exists($resource . '/' . self::CONFIGURATION_FILE_NAME)) {
                 $loader->load(self::CONFIGURATION_FILE_NAME);
@@ -54,21 +57,5 @@ final class ContainerFactory
         }
 
         return $containerBuilder;
-    }
-
-    private static function getConfigurationFileDirectories(Kernel $kernel): array
-    {
-        $paths = [
-            realpath(Constants::CONF_ROOT_PATH),
-        ];
-        if (count($kernel->getExtensions()) === 0) {
-            return $paths;
-        }
-        /** @var KernelExtension $extension */
-        foreach ($kernel->getExtensions() as $extension) {
-            $paths[] = realpath($extension->getConfigDirectory());
-        }
-
-        return $paths;
     }
 }

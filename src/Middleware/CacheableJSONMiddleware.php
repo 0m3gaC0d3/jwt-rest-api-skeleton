@@ -28,35 +28,40 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
+use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\App as API;
-use Slim\Exception\HttpUnauthorizedException;
+use Symfony\Component\Cache\Adapter\AbstractAdapter;
 
-class JsonWebTokenMiddleware implements MiddlewareInterface
+class CacheableJSONMiddleware implements CacheableMiddlewareInterface
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
+    protected AbstractAdapter $cache;
 
-    private API $api;
+    protected API $api;
 
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public function __construct(API $api)
     {
-        $this->jsonWebTokenAuth = $jwtAuth;
+        $this->cache = CacheAdapterFactory::build();
         $this->api = $api;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {
-            throw new HttpUnauthorizedException($request);
+        if (!(bool) $_ENV['ENABLE_REQUEST_CACHE']) {
+            return $handler->handle($request);
         }
-        $parsedToken = $this->jsonWebTokenAuth->createParsedToken($token);
-        $request = $request->withAttribute('token', $parsedToken);
+        $identifier = RequestIDGenerator::generate($request);
+        $item = $this->cache->getItem($identifier);
+        if ($item->isHit()) {
+            $response = $this->api->getResponseFactory()->createResponse();
+            $response->getBody()->write($item->get());
+            $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
+
+            return $response;
+        }
 
         return $handler->handle($request);
     }

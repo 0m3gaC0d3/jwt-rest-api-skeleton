@@ -28,90 +28,49 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
-use OmegaCode\JwtSecuredApiCore\Configuration\Processor\RouteConfigurationProcessor;
-use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
-use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
+use OmegaCode\JwtSecuredApiCore\Core\Api;
 use OmegaCode\JwtSecuredApiCore\Event\RouteCollectionFilledEvent;
-use OmegaCode\JwtSecuredApiCore\Factory\Route\CollectionFactory;
+use OmegaCode\JwtSecuredApiCore\Provider\RouteCollectionProvider;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
-use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\App as API;
-use Slim\Interfaces\RouteInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Router
 {
     public const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch'];
 
-    private API $api;
+    private Api $api;
 
-    private ConfigurationFileService $configurationFileService;
-
-    private JsonWebTokenAuth $auth;
+    private RouteCollectionProvider $routeCollectionProvider;
 
     private EventDispatcher $eventDispatcher;
 
     public function __construct(
-        API $api,
-        ConfigurationFileService $configurationFileService,
-        JsonWebTokenAuth $auth,
+        Api $api,
+        RouteCollectionProvider $routeCollectionProvider,
         EventDispatcher $eventDispatcher
     ) {
         $this->api = $api;
-        $this->configurationFileService = $configurationFileService;
-        $this->auth = $auth;
+        $this->routeCollectionProvider = $routeCollectionProvider;
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function registerRoutes(ContainerInterface $container): void
+    public function registerRoutes(): void
     {
-        $configuration = $this->configurationFileService->load('routes.yaml');
-        $routeCollection = CollectionFactory::build(
-            $container,
-            (new RouteConfigurationProcessor())->process($configuration)
-        );
+        $routeCollection = $this->routeCollectionProvider->getData();
         $this->eventDispatcher->dispatch(
             new RouteCollectionFilledEvent($routeCollection),
             RouteCollectionFilledEvent::NAME
         );
         foreach ($routeCollection as $routeConfig) {
-            $this->handleRequest($routeConfig);
+            $this->handleRoutes($routeConfig);
         }
     }
 
-    private function handleRequest(Configuration $config): void
+    private function handleRoutes(Configuration $config): void
     {
         /** @var string $method */
         foreach ($config->getAllowedMethods() as $method) {
-            $action = $config->getAction();
-            $eventDispatcher = $this->eventDispatcher;
-            /** @var RouteInterface $router */
-            $router = $this->api->$method(
-                $config->getRoute(),
-                function (Request $request, Response $response) use ($action, $eventDispatcher) {
-                    $eventDispatcher->dispatch(new PreRequestEvent($request, $response), PreRequestEvent::NAME);
-                    $response = $action($request, $response);
-                    $eventDispatcher->dispatch(new PostRequestEvent($request, $response), PostRequestEvent::NAME);
-
-                    return $response;
-                }
-            );
-            $this->addMiddlewares($router, $config->getMiddlewares());
-        }
-    }
-
-    private function addMiddlewares(RouteInterface $router, array $middlewares): void
-    {
-        if (count($middlewares) === 0) {
-            return;
-        }
-        /** @var string $middleware */
-        foreach ($middlewares as $middleware) {
-            $router->add($middleware);
+            $this->api->addRoute($method, $config);
         }
     }
 }
