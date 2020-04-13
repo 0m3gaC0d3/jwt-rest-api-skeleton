@@ -31,12 +31,10 @@ namespace OmegaCode\JwtSecuredApiCore\Command;
 use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use Symfony\Component\Cache\Adapter\AbstractAdapter;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * TODO add options to define caches to clear.
- */
 class ClearCacheCommand extends Command
 {
     protected static $defaultName = 'cache:clear';
@@ -52,14 +50,45 @@ class ClearCacheCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('Clears the application cache');
+        $this->addArgument('clearCacheType', InputArgument::OPTIONAL, 'Cache type to clear (system, request)', '');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->cache->clear('app.configuration');
-        $this->cache->clear('request');
-        $output->writeln('Successfully cleared all available caches!');
+        /** @var string $clearCacheType */
+        $clearCacheType = $input->getArgument('clearCacheType');
+        switch (strtolower((string) $clearCacheType)) {
+            case 'system':
+                $this->clearSystemCache();
+                $output->writeln('Successfully cleared system caches!');
+                break;
+            case 'request':
+                $this->clearRequestCache();
+                $output->writeln('Successfully cleared request cache!');
+                break;
+            default:
+                $this->clearAllCache();
+                $output->writeln('Successfully cleared all available caches!');
+                break;
+        }
 
         return 0;
+    }
+
+    private function clearSystemCache(): void
+    {
+        $this->cache->clear('system.routes');
+        $this->cache->clear('system.configuration');
+    }
+
+    private function clearRequestCache(): void
+    {
+        $this->cache->clear('request');
+    }
+
+    private function clearAllCache(): void
+    {
+        $this->clearSystemCache();
+        $this->clearRequestCache();
     }
 }

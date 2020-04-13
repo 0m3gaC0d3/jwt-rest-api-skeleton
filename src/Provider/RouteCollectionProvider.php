@@ -66,7 +66,7 @@ class RouteCollectionProvider extends CachableDataProvider
 
     public function getCacheIdentifier(): string
     {
-        return 'routes';
+        return 'system.routes';
     }
 
     private function buildRouteCollection(): RouteCollection

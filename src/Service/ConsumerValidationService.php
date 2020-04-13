@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
+use OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 
@@ -35,9 +36,9 @@ class ConsumerValidationService
 {
     private LoggerInterface $logger;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct()
     {
-        $this->logger = $logger;
+        $this->logger = LoggerFactory::build();
     }
 
     public function isValid(Request $request): bool

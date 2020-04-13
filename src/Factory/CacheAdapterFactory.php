@@ -39,7 +39,7 @@ class CacheAdapterFactory
         $cache = null;
         try {
             /** @var AbstractAdapter $cache */
-            $cache = new $_ENV['CACHE_ADAPATER_CLASS']();
+            $cache = new $_ENV['CACHE_ADAPTER_CLASS']('jwt-secured-api');
         } catch (Exception $exception) {
             throw new RuntimeException('Could not instantiate cache adapter class. check your .env file.');
         }

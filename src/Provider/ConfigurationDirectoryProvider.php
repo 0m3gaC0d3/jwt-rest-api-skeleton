@@ -58,7 +58,7 @@ class ConfigurationDirectoryProvider extends CachableDataProvider
 
     public function getCacheIdentifier(): string
     {
-        return 'app.configuration';
+        return 'system.configuration';
     }
 
     protected function getDirectoryConfiguration(): array
