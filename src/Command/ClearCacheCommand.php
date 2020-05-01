@@ -75,18 +75,18 @@ class ClearCacheCommand extends Command
         return 0;
     }
 
-    private function clearSystemCache(): void
+    protected function clearSystemCache(): void
     {
         $this->cache->clear('system.routes');
         $this->cache->clear('system.configuration');
     }
 
-    private function clearRequestCache(): void
+    protected function clearRequestCache(): void
     {
         $this->cache->clear('request');
     }
 
-    private function clearAllCache(): void
+    protected function clearAllCache(): void
     {
         $this->clearSystemCache();
         $this->clearRequestCache();

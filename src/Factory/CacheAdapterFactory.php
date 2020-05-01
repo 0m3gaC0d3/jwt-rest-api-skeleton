@@ -31,15 +31,22 @@ namespace OmegaCode\JwtSecuredApiCore\Factory;
 use Exception;
 use RuntimeException;
 use Symfony\Component\Cache\Adapter\AbstractAdapter;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class CacheAdapterFactory
 {
-    public static function build(): AbstractAdapter
+    public static function build(array $arguments = []): AbstractAdapter
     {
-        $cache = null;
         try {
-            /** @var AbstractAdapter $cache */
-            $cache = new $_ENV['CACHE_ADAPTER_CLASS']('jwt-secured-api');
+            $cacheClass = $_ENV['CACHE_ADAPTER_CLASS'];
+            switch ($cacheClass) {
+                case FilesystemAdapter::class:
+                    $cache = new FilesystemAdapter('system', 0, APP_ROOT_PATH . '/var/cache/');
+                    break;
+                default:
+                    /** @var AbstractAdapter $cache */
+                    $cache = new $_ENV['CACHE_ADAPTER_CLASS'](...$arguments);
+            }
         } catch (Exception $exception) {
             throw new RuntimeException('Could not instantiate cache adapter class. check your .env file.');
         }
