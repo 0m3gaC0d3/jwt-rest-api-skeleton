@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+declare(strict_types=1);
+
 namespace OmegaCode\JwtSecuredApiCore\Configuration\Loader;
 
 use Symfony\Component\Config\Loader\FileLoader;
