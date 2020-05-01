@@ -31,25 +31,18 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 (function () {
-    require __DIR__ . '/../../../vendor/autoload.php';
-
-    (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(__DIR__ . '/../../../.env');
-
-    define('APP_ROOT_PATH', dirname(__DIR__, 3) . '/');
-
+    define('APP_ROOT_PATH', dirname(__DIR__, 1) . '/');
+    require APP_ROOT_PATH . '/vendor/autoload.php';
+    (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(APP_ROOT_PATH . '/.env');
     $kernel = new \OmegaCode\JwtSecuredApiCore\Core\Kernel\CliKernel();
     $kernel->run();
-
     $dispatcher = new EventDispatcher();
-
     /** @var \OmegaCode\JwtSecuredApiCore\Service\CommandChainService $commandChain */
     $commandChain = $kernel->getContainer()->get(\OmegaCode\JwtSecuredApiCore\Service\CommandChainService::class);
-
     $commandLoader = new \Symfony\Component\Console\CommandLoader\ContainerCommandLoader(
         $kernel->getContainer(),
         $commandChain->getCommandInfo()
     );
-
     $application = new Application();
     $application->setDispatcher($dispatcher);
     $application->setCommandLoader($commandLoader);
