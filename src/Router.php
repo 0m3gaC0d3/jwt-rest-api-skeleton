@@ -34,7 +34,7 @@ use OmegaCode\JwtSecuredApiCore\Provider\RouteCollectionProvider;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class Router
+class Router implements RouterInterface
 {
     public const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch'];
 

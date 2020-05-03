@@ -34,7 +34,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 
-class ConfigurationFileService
+class ConfigurationFileService implements ConfigurationFileServiceInterface
 {
     protected array $configurationDirectories = [Constants::CONF_ROOT_PATH];
 
