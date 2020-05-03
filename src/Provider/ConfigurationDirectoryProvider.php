@@ -64,7 +64,7 @@ class ConfigurationDirectoryProvider extends CachableDataProvider
     protected function getDirectoryConfiguration(): array
     {
         $result = [];
-        $extraProvider = new ExtraSectionProvider(APP_ROOT_PATH . '/vendor');
+        $extraProvider = new ExtraSectionProvider(APP_ROOT_PATH . 'vendor');
         $data = $extraProvider->getData();
         foreach ($data as $path => $extra) {
             $dir = str_replace('composer.json', $extra['conf-dir'], $path);

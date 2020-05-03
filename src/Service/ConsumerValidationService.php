@@ -32,7 +32,7 @@ use OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 
-class ConsumerValidationService
+class ConsumerValidationService implements ConsumerValidationServiceInterface
 {
     private LoggerInterface $logger;
 

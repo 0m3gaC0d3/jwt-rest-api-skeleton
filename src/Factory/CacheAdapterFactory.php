@@ -41,7 +41,7 @@ class CacheAdapterFactory
             $cacheClass = $_ENV['CACHE_ADAPTER_CLASS'];
             switch ($cacheClass) {
                 case FilesystemAdapter::class:
-                    $cache = new FilesystemAdapter('system', 0, APP_ROOT_PATH . '/var/cache/');
+                    $cache = new FilesystemAdapter('system', 0, APP_ROOT_PATH . 'var/cache/');
                     break;
                 default:
                     /** @var AbstractAdapter $cache */

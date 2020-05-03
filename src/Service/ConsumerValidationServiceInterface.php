@@ -26,36 +26,11 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Generator;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
-class RequestIDGenerator implements RequestIDGeneratorInterface
+interface ConsumerValidationServiceInterface
 {
-    public const PREFIX = 'request.';
-
-    public static function generate(ServerRequestInterface $request): string
-    {
-        $serializedClaims = serialize(self::getIDClaims($request));
-        $identifier = static::PREFIX . md5(self::removeSpacesAndLowerCaseClaim($serializedClaims));
-
-        return $identifier;
-    }
-
-    private static function getIDClaims(ServerRequestInterface $request): array
-    {
-        if ($request->getMethod() === 'GET') {
-            return ['target' => $request->getRequestTarget()];
-        }
-
-        return [
-            'target' => $request->getRequestTarget(),
-            'payload' => $request->getParsedBody(),
-        ];
-    }
-
-    private static function removeSpacesAndLowerCaseClaim(string $serializedClaim): string
-    {
-        return str_replace(["\t", "\n", ' '], '', strtolower($serializedClaim));
-    }
+    public function isValid(Request $request): bool;
 }

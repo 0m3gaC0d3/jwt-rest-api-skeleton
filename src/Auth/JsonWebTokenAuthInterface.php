@@ -26,36 +26,17 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Generator;
+namespace OmegaCode\JwtSecuredApiCore\Auth;
 
-use Psr\Http\Message\ServerRequestInterface;
+use Lcobucci\JWT\Token;
 
-class RequestIDGenerator implements RequestIDGeneratorInterface
+interface JsonWebTokenAuthInterface
 {
-    public const PREFIX = 'request.';
+    public function getLifetime(): int;
 
-    public static function generate(ServerRequestInterface $request): string
-    {
-        $serializedClaims = serialize(self::getIDClaims($request));
-        $identifier = static::PREFIX . md5(self::removeSpacesAndLowerCaseClaim($serializedClaims));
+    public function createJwt(array $claims): string;
 
-        return $identifier;
-    }
+    public function createParsedToken(string $token): Token;
 
-    private static function getIDClaims(ServerRequestInterface $request): array
-    {
-        if ($request->getMethod() === 'GET') {
-            return ['target' => $request->getRequestTarget()];
-        }
-
-        return [
-            'target' => $request->getRequestTarget(),
-            'payload' => $request->getParsedBody(),
-        ];
-    }
-
-    private static function removeSpacesAndLowerCaseClaim(string $serializedClaim): string
-    {
-        return str_replace(["\t", "\n", ' '], '', strtolower($serializedClaim));
-    }
+    public function validateToken(string $accessToken): bool;
 }

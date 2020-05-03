@@ -32,8 +32,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 (function () {
     define('APP_ROOT_PATH', dirname(__DIR__, 1) . '/');
-    require APP_ROOT_PATH . '/vendor/autoload.php';
-    (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(APP_ROOT_PATH . '/.env');
+    require APP_ROOT_PATH . 'vendor/autoload.php';
+    (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(APP_ROOT_PATH . '.env');
     $kernel = new \OmegaCode\JwtSecuredApiCore\Core\Kernel\CliKernel();
     $kernel->run();
     $dispatcher = new EventDispatcher();

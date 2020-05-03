@@ -38,7 +38,7 @@ use Lcobucci\JWT\ValidationData;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
-final class JsonWebTokenAuth
+class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 {
     private string $issuer;
 

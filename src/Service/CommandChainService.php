@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
-class CommandChainService
+class CommandChainService implements CommandChainServiceInterface
 {
     protected array $commandInfo = [];
 
