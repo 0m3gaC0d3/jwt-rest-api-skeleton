@@ -31,7 +31,11 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 (function () {
-    define('APP_ROOT_PATH', dirname(__DIR__, 1) . '/');
+    if (file_exists(dirname(__DIR__, 1) . '/vendor/autoload.php')) {
+        define('APP_ROOT_PATH', dirname(__DIR__, 1) . '/');
+    } else {
+        define('APP_ROOT_PATH', dirname(__DIR__, 4) . '/');
+    }
     require APP_ROOT_PATH . 'vendor/autoload.php';
     (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(APP_ROOT_PATH . '.env');
     $kernel = new \OmegaCode\JwtSecuredApiCore\Core\Kernel\CliKernel();
