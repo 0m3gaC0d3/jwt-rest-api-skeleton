@@ -26,4 +26,8 @@ services:
   OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand:
     tags:
       - { name: 'console.command', command: 'cache:clear' }
+      -
+  OmegaCode\JwtSecuredApiCore\Command\GenerateKeysCommand:
+    tags:
+      - { name: 'console.command', command: 'api:keys:generate' }
 

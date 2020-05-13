@@ -65,6 +65,10 @@ Adjust each value of the file to your needs.
 
 Finally you have to build your project by running  `composer install`.
 
+### Create public and private key for JWT
+
+Run `bin/console api:keys:generate` to generate the keys.
+
 ## How to add endpoints / routes
 
 To provide endpoints you have to define one or more routes. This happens in your `routes.yaml`.
