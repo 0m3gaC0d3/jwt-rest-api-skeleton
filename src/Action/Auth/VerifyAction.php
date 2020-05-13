@@ -50,10 +50,9 @@ class VerifyAction extends AbstractAction
     {
         $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
         $token = $authorization[1] ?? '';
-        $result = [
+        $response->getBody()->write((string) json_encode([
             'success' => $this->auth->validateToken($token),
-        ];
-        $response->getBody()->write((string) json_encode($result));
+        ]));
         $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
 
         return $response;
