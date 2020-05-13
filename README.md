@@ -262,27 +262,51 @@ You clients need to navigate to `/auth` to obtain a JWT by providing a valid cli
 Currently client ids are stored in the environment variable `CLIENT_IDS` (comma separated list). 
 (*This is going to change soon*)
 
+### How to obtain a token
+
+To obtain tokens there is a route given by the core `/auth`
+
+The response of this request contains a json object like the following:
+````json
+{
+    "access_token": "...",
+    "token_type": "Bearer",
+    "expires_in": 900
+}
+````
+
+### How to verify a token
+
+To verify a token you can navigate to `/auth/verify`. Remember to add the token to validate in the Authorization header.
+
+The response of this request contains a json object like the following:
+````json
+{
+    "success": true
+}
+````
+
 ## Extendability
 
-One of the main goals of this framework is extendability. To realise this, well known systems are integrated.
+One of the main goals of this framework is extendability. To archive this well known systems have been integrated.
 
 ### Symfony events
 
-[Symfony events](https://symfony.com/doc/current/components/event_dispatcher.html) are used tp extend the system without
+[Symfony events](https://symfony.com/doc/current/components/event_dispatcher.html) are used to extend the system without
  using something like subclassing or other methods. A good example for core usage is the route collection.
  
 Following a list of all existing events:
-* `route_collection.filled`: This event is used to manipulate routes using PHP.
-* `request.pre`: This event is used to manipulate the request / response before the action evaluates
-* `request.post`: This event is used to manipulate the request / response after the action evaluates
+* `route_collection.filled`: This event is used to manipulate routes.
+* `request.pre`: This event is used to manipulate the request / response before the action executes
+* `request.post`: This event is used to manipulate the request / response after the action executes
 * `kernel.pre`: This event is triggered early in the process of building the HTTP kernel.
 * `kernel.post`: This event is triggered directly before Slim kicks in.
 
 ### Middlewares
 
 * `OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware`: Secures your routes with JWT.
-* `OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware`: Caches your routes as JSON.
-* `OmegaCode\JwtSecuredApiCore\Middleware\CacheableHTMLMiddleware`: Caches your routes as HTML.
+* `OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware`: Caches your response as JSON.
+* `OmegaCode\JwtSecuredApiCore\Middleware\CacheableHTMLMiddleware`: Caches your response as HTML.
 
 ### DI
 
@@ -296,7 +320,7 @@ To enable logging simply set the environment variable `ENABLE_LOG` to `1`. The l
 
 ## Errors
 
-Each error comes wrapped in JSON to ensure a better experience for your APi clients.
+Each error comes wrapped in JSON to ensure a better/consistent API experience for your clients.
 
 ## GraphQL
 
