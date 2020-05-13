@@ -85,15 +85,19 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 
     public function validateToken(string $accessToken): bool
     {
-        $token = $this->createParsedToken($accessToken);
-        if (!$token->verify($this->signer, $this->publicKey)) {
-            // Token signature is not valid
+        try {
+            $token = $this->createParsedToken($accessToken);
+            if (!$token->verify($this->signer, $this->publicKey)) {
+                // Token signature is not valid
+                return false;
+            }
+            $data = new ValidationData();
+            $data->setCurrentTime(Chronos::now()->getTimestamp());
+            $data->setIssuer($token->getClaim('iss'));
+            $data->setId($token->getClaim('jti'));
+        } catch (\Exception $e) {
             return false;
         }
-        $data = new ValidationData();
-        $data->setCurrentTime(Chronos::now()->getTimestamp());
-        $data->setIssuer($token->getClaim('iss'));
-        $data->setId($token->getClaim('jti'));
 
         return $token->validate($data);
     }

@@ -4,3 +4,8 @@ routes:
     route: /auth
     methods: [post]
     action: OmegaCode\JwtSecuredApiCore\Action\Auth\LoginAction
+  -
+    name: auth.verify
+    route: /auth/verify
+    methods: [post]
+    action: OmegaCode\JwtSecuredApiCore\Action\Auth\VerifyAction
