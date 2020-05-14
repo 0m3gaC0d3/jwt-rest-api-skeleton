@@ -13,3 +13,6 @@ bin/*
 .php_cs.cache
 clients.json
 var/cache/*
+!var/cache/.gitkeep
+var/log/*
+!var/log/.gitkeep
