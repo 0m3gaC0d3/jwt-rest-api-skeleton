@@ -257,10 +257,26 @@ To create the signature a private and a public key is needed.
 
 You clients need to navigate to `/auth` to obtain a JWT by providing a valid client ID.
 
-### How to define valid client ids
+### How to define client ids
 
-Currently client ids are stored in the environment variable `CLIENT_IDS` (comma separated list). 
-(*This is going to change soon*)
+Clients are defined in the `clients.json` in the root of your project (Never commit this file to VCS!).
+This file contains the configuration of your API clients. A client record contains of the following properties:
+* `ip`: (*optional*) Used to restrict access to client IP address.
+* `secret`: This is the key your clients need to obtain tokens by the API.
+* `permissions`: (*optional*) An array of permissions (strings). 
+How your application reacts to those values is left by you. They are a part of the claims of the token.
+
+It is recommended to generate new clients using the following command:
+````shell script
+bin/console api:client:add
+````
+
+You can also list your defined clients using teh following command:
+````shell script
+bin/console api:client:list
+````
+
+*As an additional protection layer you can add an IP restriction to your client configuration.*
 
 ### How to obtain a token
 

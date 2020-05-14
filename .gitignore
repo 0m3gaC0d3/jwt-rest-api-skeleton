@@ -11,3 +11,5 @@ bin/*
 .database/
 .idea/
 .php_cs.cache
+clients.json
+var/cache/*

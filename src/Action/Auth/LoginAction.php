@@ -52,8 +52,9 @@ class LoginAction extends AbstractAction
         if (!$this->consumerValidationService->isValid($request)) {
             throw new HttpUnauthorizedException($request);
         }
+        $clientConfiguration = $this->consumerValidationService->getClientConfigurationByRequest($request);
         $result = [
-            'access_token' => $this->auth->createJwt([]),
+            'access_token' => $this->auth->createJwt(['permissions' => $clientConfiguration['permissions'] ?? []]),
             'token_type' => 'Bearer',
             'expires_in' => $this->auth->getLifetime(),
         ];
