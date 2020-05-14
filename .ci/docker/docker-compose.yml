@@ -74,7 +74,7 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-          php vendor/bin/phpunit -c phpunit.xml tests;
+          php vendor/bin/phpunit -c phpunit.xml tests/Unit;
       "
   #======================================================
   # end to end tests
