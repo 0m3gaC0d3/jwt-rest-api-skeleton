@@ -97,6 +97,7 @@ services:
   # api
   #======================================================
   api:
+    container_name: api
     build: ./../../.docker
     volumes:
       - ${ROOT_DIR}:/var/www/html
