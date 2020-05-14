@@ -1,0 +1,17 @@
+version: '2.3'
+services:
+  app:
+    container_name: app
+    build: ./.docker
+    ports:
+      - 80:80
+    volumes:
+      - ./composer.json:/var/www/html/composer.json:cached
+      - ./.env:/var/www/html/.env:cached
+      - ./.env.test:/var/www/html/.env.test:cached
+      - ./src:/var/www/html/src:cached
+      - ./res:/var/www/html/res:cached
+      - ./public:/var/www/html/public:cached
+      - ./conf:/var/www/html/conf:cached
+      - ./keys:/var/www/html/keys:cached
+      - ./bin:/var/www/html/bin:cached
