@@ -31,3 +31,10 @@ services:
     tags:
       - { name: 'console.command', command: 'api:keys:generate' }
 
+  OmegaCode\JwtSecuredApiCore\Command\Client\AddClientCommand:
+    tags:
+      - { name: 'console.command', command: 'api:client:add' }
+
+  OmegaCode\JwtSecuredApiCore\Command\Client\ListClientCommand:
+    tags:
+      - { name: 'console.command', command: 'api:client:list' }

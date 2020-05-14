@@ -31,10 +31,19 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 (function () {
-    if (file_exists(dirname(__DIR__, 1) . '/vendor/autoload.php')) {
-        define('APP_ROOT_PATH', dirname(__DIR__, 1) . '/');
-    } else {
-        define('APP_ROOT_PATH', dirname(__DIR__, 4) . '/');
+    $possibleVendors = [
+        dirname(__DIR__, 1), // look for myself
+        dirname(__DIR__, 3), // look for local package directory
+        dirname(__DIR__, 4), // look for global vendor
+    ];
+    foreach ($possibleVendors as $possibleVendor) {
+        if (file_exists($possibleVendor . '/vendor/autoload.php')) {
+            define('APP_ROOT_PATH', $possibleVendor . '/');
+            break;
+        }
+    }
+    if (!defined('APP_ROOT_PATH')) {
+        throw new RuntimeException("Could not find vendor directory!");
     }
     require APP_ROOT_PATH . 'vendor/autoload.php';
     (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(APP_ROOT_PATH . '.env');

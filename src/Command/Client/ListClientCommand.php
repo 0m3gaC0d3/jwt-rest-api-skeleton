@@ -26,51 +26,49 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Service;
+namespace OmegaCode\JwtSecuredApiCore\Command\Client;
 
 use OmegaCode\JwtSecuredApiCore\Client\Manager\ClientConfigurationManagerInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class ConsumerValidationService implements ConsumerValidationServiceInterface
+class ListClientCommand extends Command
 {
+    protected static $defaultName = 'api:client:list';
+
     protected ClientConfigurationManagerInterface $clientConfigurationManager;
 
     public function __construct(ClientConfigurationManagerInterface $clientConfigurationManager)
     {
+        parent::__construct();
         $this->clientConfigurationManager = $clientConfigurationManager;
     }
 
-    public function isValid(Request $request): bool
+    protected function configure(): void
     {
-        return is_array($this->getClientConfigurationByRequest($request));
+        $this->setDescription('Lists all clients of the clients.json.');
     }
 
-    public function getClientConfigurationByRequest(Request $request): ?array
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $remoteAddress = $request->getServerParams()['REMOTE_ADDR'];
-        $requestClientId = $this->getRequestClientId($request);
-        $allowedClients = $this->clientConfigurationManager->getConfiguration()['clients'] ?? [];
-        foreach ($allowedClients as $allowedClient) {
-            if ($allowedClient['secret'] != $requestClientId) {
-                continue;
-            }
-            if (empty($allowedClient['ip'])) {
-                return $allowedClient;
-            }
-            if ($allowedClient['ip'] != $remoteAddress) {
-                continue;
-            }
+        $this->renderResultTable(
+            $output,
+            $this->clientConfigurationManager->getConfiguration()['clients'] ?? []
+        );
 
-            return $allowedClient;
+        return 0;
+    }
+
+    protected function renderResultTable(OutputInterface $output, array $clients): void
+    {
+        $table = new Table($output);
+        $table->setHeaders(['ip', 'secret', 'permissions']);
+        /** @var array $client */
+        foreach ($clients as $client) {
+            $table->addRow([$client['ip'], $client['secret'], implode(', ', (array) $client['permissions'])]);
         }
-
-        return null;
-    }
-
-    protected function getRequestClientId(Request $request): string
-    {
-        $data = (array) $request->getParsedBody();
-
-        return (string) ($data['clientId'] ?? '');
+        $table->render();
     }
 }

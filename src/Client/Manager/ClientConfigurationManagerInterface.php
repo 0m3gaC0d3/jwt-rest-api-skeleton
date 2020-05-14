@@ -26,13 +26,13 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Service;
+namespace OmegaCode\JwtSecuredApiCore\Client\Manager;
 
-use Psr\Http\Message\ServerRequestInterface as Request;
-
-interface ConsumerValidationServiceInterface
+interface ClientConfigurationManagerInterface
 {
-    public function isValid(Request $request): bool;
+    public const CONFIGURATION_FILE_NAME = 'clients.json';
 
-    public function getClientConfigurationByRequest(Request $request): ?array;
+    public function addNewClient(array $configuration): void;
+
+    public function getConfiguration(): array;
 }
