@@ -19,8 +19,14 @@ use OmegaCode\JwtSecuredApiCore\Core\Kernel\HttpKernel;
         }
     }
 
+    header('Content-Type: application/json');
+    $data = [
+        'getenv' => getenv(),
+        '$_ENV' => $_ENV,
+        'APPLICATION_ENVIRONMENT' => $_ENV['APPLICATION_ENVIRONMENT']
+    ];
 
-    throw new Exception(json_encode($_ENV));
+    throw new Exception($data);
 
 
     (new HttpKernel())->run();
