@@ -90,9 +90,6 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-          echo \"evn: ${APPLICATION_ENVIRONMENT}\";
-          echo -n \"PUBLIC_TEST_KEY length: ${PUBLIC_TEST_KEY}\" | wc -c
-          echo -n \"PRIVATE_TEST_KEY length: ${PRIVATE_TEST_KEY}\" | wc -c
           php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
       "
   #======================================================
@@ -105,13 +102,3 @@ services:
       - ${ROOT_DIR}:/var/www/html
     ports:
       - 80:80
-    command: >
-      /bin/sh -c "
-          echo \"evn: ${APPLICATION_ENVIRONMENT}\";
-          echo -n \"PUBLIC_TEST_KEY length: ${PUBLIC_TEST_KEY}\" | wc -c
-          echo -n \"PRIVATE_TEST_KEY length: ${PRIVATE_TEST_KEY}\" | wc -c
-      "
-#    environment:
-#      - PRIVATE_TEST_KEY
-#      - PUBLIC_TEST_KEY
-#      - APPLICATION_ENVIRONMENT
