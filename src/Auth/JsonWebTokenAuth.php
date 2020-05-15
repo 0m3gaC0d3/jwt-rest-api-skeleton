@@ -120,6 +120,13 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 
             return;
         }
+        // Also check getenv for CI
+        if (getenv('PRIVATE_KEY') && getenv('PUBLIC_KEY')) {
+            $this->privateKey = str_replace('\n', '', getenv('PRIVATE_KEY'));
+            $this->publicKey = str_replace('\n', '', getenv('PUBLIC_KEY'));
+
+            return;
+        }
         if ($_ENV['PRIVATE_KEY_PATH'] && $_ENV['PUBLIC_KEY_PATH']) {
             if (!file_exists(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'])) {
                 throw new FileNotFoundException('Could not find file ' . APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH']);
