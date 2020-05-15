@@ -29,5 +29,7 @@ script:
     .ci/scripts/ciRunner.sh -s unit -p $TRAVIS_PHP_VERSION
 
   - >
+    export PRIVATE_TEST_KEY=$PRIVATE_TEST_KEY
+    export PUBLIC_TEST_KEY=$PUBLIC_TEST_KEY
     echo "Running end to end tests";
     .ci/scripts/ciRunner.sh -s e2e -p $TRAVIS_PHP_VERSION
