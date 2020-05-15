@@ -90,6 +90,7 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
+          echo \"evn: ${APPLICATION_ENVIRONMENT}\";
           php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
       "
   #======================================================
