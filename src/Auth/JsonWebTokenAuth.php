@@ -36,7 +36,6 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 {
@@ -50,12 +49,18 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 
     private Sha256 $signer;
 
-    public function __construct(string $issuer, int $lifetime, string $privateKeyPath, string $publicKeyPath)
-    {
+    public function __construct(
+        string $issuer,
+        int $lifetime,
+        string $privateKey,
+        string $publicKey
+    ) {
         $this->issuer = $issuer;
         $this->lifetime = $lifetime;
         $this->signer = new Sha256();
-        $this->getKeyFileContent($privateKeyPath, $publicKeyPath);
+        $this->privateKey = $privateKey;
+        $this->publicKey = $publicKey;
+        $this->loadKeysIfNecessary();
     }
 
     public function getLifetime(): int
@@ -102,14 +107,13 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
         return $token->validate($data);
     }
 
-    private function getKeyFileContent(string $privateKeyPath, string $publicKeyPath): void
+    protected function loadKeysIfNecessary(): void
     {
-        $privateKeyFilePath = APP_ROOT_PATH . $privateKeyPath;
-        $publicKeyFilePath = APP_ROOT_PATH . $publicKeyPath;
-        if (!file_exists($privateKeyFilePath) || !file_exists($publicKeyFilePath)) {
-            throw new FileNotFoundException('Could not load key files');
+        if (file_exists(APP_ROOT_PATH . $this->privateKey)) {
+            $this->privateKey = (string) file_get_contents(APP_ROOT_PATH . $this->privateKey);
         }
-        $this->privateKey = (string) file_get_contents($privateKeyFilePath);
-        $this->publicKey = (string) file_get_contents($publicKeyFilePath);
+        if (file_exists(APP_ROOT_PATH . $this->publicKey)) {
+            $this->publicKey = (string) file_get_contents(APP_ROOT_PATH . $this->publicKey);
+        }
     }
 }

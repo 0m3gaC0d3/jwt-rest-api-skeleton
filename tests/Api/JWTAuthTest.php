@@ -23,7 +23,7 @@ class JWTAuthTest extends TestCase
     {
         $response = $this->client->request('POST', 'http://api/auth', ['http_errors' => false,]);
 
-        dump((string) $response->getBody());
+//        dump((string) $response->getBody());
 
         $this->assertEquals(401, $response->getStatusCode());
     }

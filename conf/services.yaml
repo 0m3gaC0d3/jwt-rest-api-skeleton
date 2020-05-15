@@ -1,3 +1,10 @@
+parameters:
+  privateKey: '%env(default:privateKeyPath:string:PRIVATE_KEY)%'
+  privateKeyPath: '%env(default:empty:string:PRIVATE_KEY_PATH)%'
+  publicKey: '%env(default:publicKeyPath:string:PUBLIC_KEY)%'
+  publicKeyPath: '%env(default:empty:string:PUBLIC_KEY_PATH)%'
+  empty: ''
+
 services:
   _defaults:
     autowire: true
@@ -11,8 +18,8 @@ services:
     arguments:
       $issuer: '%env(string:JWT_ISSUER)%'
       $lifetime: '%env(int:JWT_LIFETIME)%'
-      $privateKeyPath: '%env(string:PRIVATE_KEY_PATH)%'
-      $publicKeyPath: '%env(string:PUBLIC_KEY_PATH)%'
+      $privateKey: '%privateKey%'
+      $publicKey: '%publicKey%'
 
   Symfony\Component\EventDispatcher\EventDispatcher:
     public: true
