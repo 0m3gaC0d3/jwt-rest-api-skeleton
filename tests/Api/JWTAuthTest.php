@@ -22,9 +22,6 @@ class JWTAuthTest extends TestCase
     public function accessTokenRouteWithOutSecretReturns401(): void
     {
         $response = $this->client->request('POST', 'http://api/auth', ['http_errors' => false,]);
-
-        dump((string) $response->getBody());
-
         $this->assertEquals(401, $response->getStatusCode());
     }
 
@@ -49,6 +46,7 @@ class JWTAuthTest extends TestCase
             'http_errors' => false,
             'json' => ["clientId" => "1234"]// @see res/test/api/clients.test.json
         ]);
+        dump((string) $response->getBody());
         $this->assertEquals(201, $response->getStatusCode());
     }
 
