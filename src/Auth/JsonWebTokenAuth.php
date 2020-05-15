@@ -59,8 +59,6 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
         $this->lifetime = $lifetime;
         $this->signer = new Sha256();
         $this->initializeKeys();
-        echo $this->privateKey;
-        die();
     }
 
     public function getLifetime(): int
@@ -110,15 +108,15 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
     protected function initializeKeys(): void
     {
         if ($_ENV['PRIVATE_KEY'] && $_ENV['PUBLIC_KEY']) {
-            $this->privateKey = str_replace('\n', '', $_ENV['PRIVATE_KEY']);
-            $this->publicKey = str_replace('\n', '', $_ENV['PUBLIC_KEY']);
+            $this->privateKey = str_replace(['\n', '"'], '', $_ENV['PRIVATE_KEY']);
+            $this->publicKey = str_replace(['\n', '"'], '', $_ENV['PUBLIC_KEY']);
 
             return;
         }
         // Also check getenv for CI
         if (getenv('PRIVATE_KEY') && getenv('PUBLIC_KEY')) {
-            $this->privateKey = str_replace('\n', '', (string) getenv('PRIVATE_KEY'));
-            $this->publicKey = str_replace('\n', '', (string) getenv('PUBLIC_KEY'));
+            $this->privateKey = str_replace(['\n', '"'], '', (string) getenv('PRIVATE_KEY'));
+            $this->publicKey = str_replace(['\n', '"'], '', (string) getenv('PUBLIC_KEY'));
 
             return;
         }
