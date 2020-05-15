@@ -102,3 +102,7 @@ services:
       - ${ROOT_DIR}:/var/www/html
     ports:
       - 80:80
+    environment:
+      - PRIVATE_TEST_KEY
+      - PUBLIC_TEST_KEY
+      - APPLICATION_ENVIRONMENT
