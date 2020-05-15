@@ -10,8 +10,8 @@ bin/*
 .idea/
 .php_cs.cache
 clients.json
-var/cache/*
-!var/cache/.gitkeep
+var/cache/system/*
+!var/cache/system/.gitkeep
 var/log/*
 !var/log/.gitkeep
 *.pem
