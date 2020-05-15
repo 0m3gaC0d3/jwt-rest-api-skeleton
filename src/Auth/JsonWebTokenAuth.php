@@ -59,15 +59,7 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
         $this->lifetime = $lifetime;
         $this->signer = new Sha256();
         $this->initializeKeys();
-
-
-        $data = [
-            'getenv' => getenv(),
-            '$_ENV' => $_ENV
-        ];
-        header('Content-Type: application/json');
-        echo json_encode($data);
-
+        echo $this->privateKey;
         die();
     }
 
