@@ -5,15 +5,13 @@ services:
     public: true
   OmegaCode\JwtSecuredApiCore\:
     resource: '../src/*'
-    exclude: '../src/{DependencyInjection,Composer,Error,Configuration,Factory,Extension,Event,Collection,Route,Kernel.php,Constants.php,ConfigurationDirectoryProvider.php}'
-
-  OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth:
-    arguments:
-      $issuer: '%env(string:JWT_ISSUER)%'
-      $lifetime: '%env(int:JWT_LIFETIME)%'
+    exclude: '../src/{Auth,DependencyInjection,Composer,Error,Configuration,Factory,Extension,Event,Collection,Route,Kernel.php,Constants.php,ConfigurationDirectoryProvider.php}'
 
   Symfony\Component\EventDispatcher\EventDispatcher:
     public: true
+
+  OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface:
+    synthetic: true
 
   Slim\App:
     synthetic: true

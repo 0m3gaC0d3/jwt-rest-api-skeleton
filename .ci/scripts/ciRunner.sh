@@ -12,7 +12,7 @@ setUpDockerComposeDotEnv() {
   echo "PHP_VERSION=${PHP_VERSION}" >>.env
 }
 
-export APPLICATION_ENVIRONMENT="test"
+export APP_ENV="test"
 
 # Function to get the real path on mac os.
 realpath() {

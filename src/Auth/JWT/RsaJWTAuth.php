@@ -26,35 +26,46 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Action\Auth;
+namespace OmegaCode\JwtSecuredApiCore\Auth\JWT;
 
-use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
-use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
-use OmegaCode\JwtSecuredApiCore\Service\ConsumerValidationService;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Lcobucci\JWT\Signer;
+use Lcobucci\JWT\Signer\Key;
+use Lcobucci\JWT\Signer\Rsa\Sha256;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
-class VerifyAction extends AbstractAction
+class RsaJWTAuth extends AbstractJWTAuth
 {
-    private JWTAuthInterface $auth;
+    private string $privateKeyPath;
 
-    private ConsumerValidationService $consumerValidationService;
+    private string $publicKeyPath;
 
-    public function __construct(JWTAuthInterface $auth, ConsumerValidationService $consumerValidationService)
+    public function __construct(string $issuer, int $lifetime, string $privateKeyPath, string $publicKeyPath)
     {
-        $this->auth = $auth;
-        $this->consumerValidationService = $consumerValidationService;
+        parent::__construct($issuer, $lifetime);
+        $this->privateKeyPath = $privateKeyPath;
+        $this->publicKeyPath = $publicKeyPath;
     }
 
-    public function __invoke(Request $request, Response $response): Response
+    public function getSignerKey(): Key
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        $response->getBody()->write((string) json_encode([
-            'success' => $this->auth->validateToken($token),
-        ]));
-        $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
+        if (!file_exists($this->privateKeyPath)) {
+            throw new FileNotFoundException('Could not find private key in path: ' . $this->privateKeyPath);
+        }
 
-        return $response;
+        return new Key((string) file_get_contents($this->privateKeyPath));
+    }
+
+    public function getVerifyKey(): string
+    {
+        if (!file_exists($this->publicKeyPath)) {
+            throw new FileNotFoundException('Could not find private key in path: ' . $this->publicKeyPath);
+        }
+
+        return $this->publicKeyPath;
+    }
+
+    public function getSigner(): Signer
+    {
+        return new Sha256();
     }
 }

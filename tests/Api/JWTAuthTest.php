@@ -46,7 +46,6 @@ class JWTAuthTest extends TestCase
             'http_errors' => false,
             'json' => ["clientId" => "1234"]// @see res/test/api/clients.test.json
         ]);
-        dump((string) $response->getBody());
         $this->assertEquals(201, $response->getStatusCode());
     }
 

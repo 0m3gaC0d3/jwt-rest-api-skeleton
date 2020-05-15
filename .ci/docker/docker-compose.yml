@@ -105,4 +105,4 @@ services:
     environment:
       - PRIVATE_KEY
       - PUBLIC_KEY
-      - APPLICATION_ENVIRONMENT
+      - APP_ENV
