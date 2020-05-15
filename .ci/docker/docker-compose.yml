@@ -103,6 +103,6 @@ services:
     ports:
       - 80:80
     environment:
-      - PRIVATE_TEST_KEY
-      - PUBLIC_TEST_KEY
+      - PRIVATE_KEY
+      - PUBLIC_KEY
       - APPLICATION_ENVIRONMENT

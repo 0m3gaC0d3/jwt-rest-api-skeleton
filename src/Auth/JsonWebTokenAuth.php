@@ -29,6 +29,7 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Auth;
 
 use Cake\Chronos\Chronos;
+use Exception;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Key;
@@ -36,6 +37,7 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 {
@@ -51,22 +53,19 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
 
     public function __construct(
         string $issuer,
-        int $lifetime,
-        string $privateKey,
-        string $publicKey
+        int $lifetime
     ) {
         $this->issuer = $issuer;
         $this->lifetime = $lifetime;
         $this->signer = new Sha256();
-        $this->privateKey = $privateKey;
-        $this->publicKey = $publicKey;
-
-
-
-         echo $this->privateKey;
-
-         die();
-        $this->loadKeysIfNecessary();
+        $this->initializeKeys();
+        ////        header('Content-Type: application/json');
+//
+//        echo $this->privateKey;
+//
+//
+////        echo $this->privateKey;
+//        die();
     }
 
     public function getLifetime(): int
@@ -113,13 +112,26 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
         return $token->validate($data);
     }
 
-    protected function loadKeysIfNecessary(): void
+    protected function initializeKeys(): void
     {
-        if (file_exists(APP_ROOT_PATH . $this->privateKey)) {
-            $this->privateKey = (string) file_get_contents(APP_ROOT_PATH . $this->privateKey);
+        if ($_ENV['PRIVATE_KEY'] && $_ENV['PUBLIC_KEY']) {
+            $this->privateKey = str_replace('\n', '', $_ENV['PRIVATE_KEY']);
+            $this->publicKey = str_replace('\n', '', $_ENV['PUBLIC_KEY']);
+
+            return;
         }
-        if (file_exists(APP_ROOT_PATH . $this->publicKey)) {
-            $this->publicKey = (string) file_get_contents(APP_ROOT_PATH . $this->publicKey);
+        if ($_ENV['PRIVATE_KEY_PATH'] && $_ENV['PUBLIC_KEY_PATH']) {
+            if (!file_exists(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'])) {
+                throw new FileNotFoundException('Could not find file ' . APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH']);
+            }
+            if (!file_exists(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'])) {
+                throw new FileNotFoundException('Could not find file ' . APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH']);
+            }
+            $this->privateKey = (string) file_get_contents(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH']);
+            $this->publicKey = (string) file_get_contents(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH']);
+
+            return;
         }
+        throw new Exception('Could not find PRIVATE_KEY & PUBLIC_KEY or PRIVATE_KEY_PATH & PUBLIC_KEY_PATH envs');
     }
 }
