@@ -18,18 +18,5 @@ use OmegaCode\JwtSecuredApiCore\Core\Kernel\HttpKernel;
             file_put_contents(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'], getenv('PUBLIC_TEST_KEY'));
         }
     }
-
-    header('Content-Type: application/json');
-    $data = [
-        'getenv' => getenv(),
-        '$_ENV' => $_ENV,
-        'APPLICATION_ENVIRONMENT' => $_ENV['APPLICATION_ENVIRONMENT']
-    ];
-
-    echo json_encode($data);
-
-    die();
-
-
     (new HttpKernel())->run();
 })();

@@ -55,7 +55,7 @@ class HttpKernel extends AbstractKernel
                 AbstractErrorHandler::DEFAULT_RESPONSE;
             die();
         }
-        (new LowLevelErrorHandler(true, false)); // (bool) $_ENV['SHOW_ERRORS']
+        (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], false));
         parent::__construct();
     }
 
