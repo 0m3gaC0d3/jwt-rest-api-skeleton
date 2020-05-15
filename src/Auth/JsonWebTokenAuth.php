@@ -60,6 +60,12 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
         $this->signer = new Sha256();
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
+
+
+
+         echo $this->privateKey;
+
+         die();
         $this->loadKeysIfNecessary();
     }
 
