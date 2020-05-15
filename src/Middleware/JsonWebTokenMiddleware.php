@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Middleware;
 
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -38,11 +38,11 @@ use Slim\Exception\HttpUnauthorizedException;
 
 class JsonWebTokenMiddleware implements MiddlewareInterface
 {
-    private JsonWebTokenAuth $jsonWebTokenAuth;
+    private JWTAuthInterface $jsonWebTokenAuth;
 
     private API $api;
 
-    public function __construct(JsonWebTokenAuth $jwtAuth, API $api)
+    public function __construct(JWTAuthInterface $jwtAuth, API $api)
     {
         $this->jsonWebTokenAuth = $jwtAuth;
         $this->api = $api;

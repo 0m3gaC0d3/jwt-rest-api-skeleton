@@ -2,8 +2,6 @@
 vendor/
 composer.lock
 composer.phar
-keys/*
-!keys/.gitkeep
 bin/*
 !bin/.gitkeep
 !bin/console
@@ -12,4 +10,8 @@ bin/*
 .idea/
 .php_cs.cache
 clients.json
-var/cache/*
+var/cache/system/*
+!var/cache/system/.gitkeep
+var/log/*
+!var/log/.gitkeep
+*.pem

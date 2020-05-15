@@ -26,36 +26,25 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Auth;
+namespace OmegaCode\JwtSecuredApiCore\Auth\JWT;
 
 use Cake\Chronos\Chronos;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Signer\Key;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
-class JsonWebTokenAuth implements JsonWebTokenAuthInterface
+abstract class AbstractJWTAuth implements JWTAuthInterface
 {
-    private string $issuer;
+    protected string $issuer;
 
-    private int $lifetime;
+    protected int $lifetime;
 
-    private string $privateKey;
-
-    private string $publicKey;
-
-    private Sha256 $signer;
-
-    public function __construct(string $issuer, int $lifetime, string $privateKeyPath, string $publicKeyPath)
+    public function __construct(string $issuer, int $lifetime)
     {
         $this->issuer = $issuer;
         $this->lifetime = $lifetime;
-        $this->signer = new Sha256();
-        $this->getKeyFileContent($privateKeyPath, $publicKeyPath);
     }
 
     public function getLifetime(): int
@@ -75,7 +64,7 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
             $builder->withClaim($name, $value);
         }
 
-        return (string) $builder->getToken($this->signer, new Key($this->privateKey));
+        return (string) $builder->getToken($this->getSigner(), $this->getSignerKey());
     }
 
     public function createParsedToken(string $token): Token
@@ -87,7 +76,7 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
     {
         try {
             $token = $this->createParsedToken($accessToken);
-            if (!$token->verify($this->signer, $this->publicKey)) {
+            if (!$token->verify($this->getSigner(), $this->getVerifyKey())) {
                 // Token signature is not valid
                 return false;
             }
@@ -100,16 +89,5 @@ class JsonWebTokenAuth implements JsonWebTokenAuthInterface
         }
 
         return $token->validate($data);
-    }
-
-    private function getKeyFileContent(string $privateKeyPath, string $publicKeyPath): void
-    {
-        $privateKeyFilePath = APP_ROOT_PATH . $privateKeyPath;
-        $publicKeyFilePath = APP_ROOT_PATH . $publicKeyPath;
-        if (!file_exists($privateKeyFilePath) || !file_exists($publicKeyFilePath)) {
-            throw new FileNotFoundException('Could not load key files');
-        }
-        $this->privateKey = (string) file_get_contents($privateKeyFilePath);
-        $this->publicKey = (string) file_get_contents($publicKeyFilePath);
     }
 }

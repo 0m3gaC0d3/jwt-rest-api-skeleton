@@ -26,35 +26,29 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Action\Auth;
+namespace OmegaCode\JwtSecuredApiCore\Factory;
 
-use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
-use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
-use OmegaCode\JwtSecuredApiCore\Service\ConsumerValidationService;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use OmegaCode\JwtSecuredApiCore\Auth\JWT\HmacJWTAuth;
+use OmegaCode\JwtSecuredApiCore\Auth\JWT\RsaJWTAuth;
 
-class VerifyAction extends AbstractAction
+class JWTAuthFactory
 {
-    private JWTAuthInterface $auth;
-
-    private ConsumerValidationService $consumerValidationService;
-
-    public function __construct(JWTAuthInterface $auth, ConsumerValidationService $consumerValidationService)
+    public static function buildRsaAuth(): RsaJWTAuth
     {
-        $this->auth = $auth;
-        $this->consumerValidationService = $consumerValidationService;
+        return new RsaJWTAuth(
+            (string) $_ENV['JWT_ISSUER'],
+            (int) $_ENV['JWT_LIFETIME'],
+            APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'],
+            APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'],
+        );
     }
 
-    public function __invoke(Request $request, Response $response): Response
+    public static function buildHmacAuth(): HmacJWTAuth
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        $response->getBody()->write((string) json_encode([
-            'success' => $this->auth->validateToken($token),
-        ]));
-        $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
-
-        return $response;
+        return new HmacJWTAuth(
+            (string) $_ENV['JWT_ISSUER'],
+            (int) $_ENV['JWT_LIFETIME'],
+            $_ENV['KEY']
+        );
     }
 }

@@ -36,7 +36,9 @@ class ClientConfigurationManager implements ClientConfigurationManagerInterface
 
     public function __construct()
     {
-        $this->configurationFilePath = APP_ROOT_PATH . static::CONFIGURATION_FILE_NAME;
+        $configFile = $_ENV['APP_ENV'] === 'test' ? 'res/test/api/clients.test.json' :
+            static::CONFIGURATION_FILE_NAME;
+        $this->configurationFilePath = APP_ROOT_PATH . $configFile;
     }
 
     public function addNewClient(array $clientConfiguration): void

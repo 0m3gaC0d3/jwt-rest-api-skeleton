@@ -26,11 +26,13 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Auth;
+namespace OmegaCode\JwtSecuredApiCore\Auth\JWT;
 
+use Lcobucci\JWT\Signer;
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Token;
 
-interface JsonWebTokenAuthInterface
+interface JWTAuthInterface
 {
     public function getLifetime(): int;
 
@@ -39,4 +41,10 @@ interface JsonWebTokenAuthInterface
     public function createParsedToken(string $token): Token;
 
     public function validateToken(string $accessToken): bool;
+
+    public function getSignerKey(): Key;
+
+    public function getVerifyKey(): string;
+
+    public function getSigner(): Signer;
 }
