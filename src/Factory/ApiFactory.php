@@ -42,16 +42,16 @@ class ApiFactory
         $api = AppFactory::create(null, $container);
         $api->addBodyParsingMiddleware();
         $errorMiddleware = $api->addErrorMiddleware(
-            (bool) $_ENV['SHOW_ERRORS'],
+            true,//            (bool) $_ENV['SHOW_ERRORS'],
             (bool) $_ENV['ENABLE_LOG'],
-            (bool) $_ENV['SHOW_ERRORS']
+            true
         );
         /** @var ErrorHandler $errorHandler */
         $errorHandler = $errorMiddleware->getDefaultErrorHandler();
         $errorHandler->forceContentType('application/json');
         $errorHandler->registerErrorRenderer(
             'application/json',
-            new ApiErrorRenderer((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG'], $logger)
+            new ApiErrorRenderer(true, (bool) $_ENV['ENABLE_LOG'], $logger)
         );
 
         return $api;
