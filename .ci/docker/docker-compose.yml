@@ -91,17 +91,18 @@ services:
     command: >
       /bin/sh -c "
           php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
-          rm -rf var/cache/*
       "
   #======================================================
   # api
   #======================================================
   api:
     container_name: api
-    build: ./../../.docker
+    image: omegacode/jwt-secured-api-web-server:1.0
     volumes:
       - ${ROOT_DIR}:/var/www/html
     ports:
       - 80:80
     environment:
-      APPLICATION_ENVIRONMENT: test
+      - PRIVATE_KEY
+      - PUBLIC_KEY
+      - APP_ENV

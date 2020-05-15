@@ -28,11 +28,13 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Core\Kernel;
 
+use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
 use OmegaCode\JwtSecuredApiCore\Error\AbstractErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Event\Kernel\PostKernelInitializationEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Kernel\PreKernelInitializationEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\ApiFactory;
+use OmegaCode\JwtSecuredApiCore\Factory\JWTAuthFactory;
 use OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory;
 use OmegaCode\JwtSecuredApiCore\Router;
 use OmegaCode\JwtSecuredApiCore\Service\ConfigurationFileService;
@@ -85,7 +87,13 @@ class HttpKernel extends AbstractKernel
         parent::initialize();
         $this->logger = LoggerFactory::build();
         $this->api = ApiFactory::build($this->container, $this->logger);
+        $this->container->set(JWTAuthInterface::class, $this->getConcreteAuth());
         $this->container->set(get_class($this->logger), $this->logger);
         $this->container->set(get_class($this->api), $this->api);
+    }
+
+    protected function getConcreteAuth(): JWTAuthInterface
+    {
+        return $_ENV['APP_ENV'] === 'test' ? JWTAuthFactory::buildHmacAuth() : JWTAuthFactory::buildRsaAuth();
     }
 }

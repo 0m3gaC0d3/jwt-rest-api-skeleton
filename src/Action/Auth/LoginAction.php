@@ -29,7 +29,7 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Action\Auth;
 
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
-use OmegaCode\JwtSecuredApiCore\Auth\JsonWebTokenAuth;
+use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
 use OmegaCode\JwtSecuredApiCore\Service\ConsumerValidationService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -37,11 +37,11 @@ use Slim\Exception\HttpUnauthorizedException;
 
 class LoginAction extends AbstractAction
 {
-    private JsonWebTokenAuth $auth;
+    private JWTAuthInterface $auth;
 
     private ConsumerValidationService $consumerValidationService;
 
-    public function __construct(JsonWebTokenAuth $auth, ConsumerValidationService $consumerValidationService)
+    public function __construct(JWTAuthInterface $auth, ConsumerValidationService $consumerValidationService)
     {
         $this->auth = $auth;
         $this->consumerValidationService = $consumerValidationService;

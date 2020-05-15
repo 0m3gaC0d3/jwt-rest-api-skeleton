@@ -26,35 +26,34 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Action\Auth;
+namespace OmegaCode\JwtSecuredApiCore\Auth\JWT;
 
-use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
-use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
-use OmegaCode\JwtSecuredApiCore\Service\ConsumerValidationService;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Lcobucci\JWT\Signer;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key;
 
-class VerifyAction extends AbstractAction
+class HmacJWTAuth extends AbstractJWTAuth
 {
-    private JWTAuthInterface $auth;
+    protected string $key;
 
-    private ConsumerValidationService $consumerValidationService;
-
-    public function __construct(JWTAuthInterface $auth, ConsumerValidationService $consumerValidationService)
+    public function __construct(string $issuer, int $lifetime, string $key)
     {
-        $this->auth = $auth;
-        $this->consumerValidationService = $consumerValidationService;
+        parent::__construct($issuer, $lifetime);
+        $this->key = $key;
     }
 
-    public function __invoke(Request $request, Response $response): Response
+    public function getSignerKey(): Key
     {
-        $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
-        $token = $authorization[1] ?? '';
-        $response->getBody()->write((string) json_encode([
-            'success' => $this->auth->validateToken($token),
-        ]));
-        $response = $response->withStatus(200)->withHeader('Content-type', 'application/json');
+        return new Key($this->key);
+    }
 
-        return $response;
+    public function getVerifyKey(): string
+    {
+        return $this->key;
+    }
+
+    public function getSigner(): Signer
+    {
+        return new Sha256();
     }
 }
