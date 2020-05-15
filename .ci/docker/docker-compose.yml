@@ -91,7 +91,6 @@ services:
     command: >
       /bin/sh -c "
           php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
-          rm -rf var/cache/*
       "
   #======================================================
   # api
@@ -104,4 +103,6 @@ services:
     ports:
       - 80:80
     environment:
-      APPLICATION_ENVIRONMENT: test
+      - PRIVATE_TEST_KEY
+      - PUBLIC_TEST_KEY
+      - APPLICATION_ENVIRONMENT
