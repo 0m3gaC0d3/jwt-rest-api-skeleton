@@ -91,6 +91,8 @@ services:
     command: >
       /bin/sh -c "
           echo \"evn: ${APPLICATION_ENVIRONMENT}\";
+          echo -n "PUBLIC_TEST_KEY length: ${PUBLIC_TEST_KEY}" | wc -c
+          echo -n "PRIVATE_TEST_KEY length: ${PRIVATE_TEST_KEY}" | wc -c
           php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
       "
   #======================================================
