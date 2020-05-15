@@ -12,10 +12,10 @@ use OmegaCode\JwtSecuredApiCore\Core\Kernel\HttpKernel;
     // Create test keys if not present.
     if ($_ENV['APPLICATION_ENVIRONMENT'] === 'test') {
         if (!file_exists(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'])) {
-            file_put_contents(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'], $_ENV['PRIVATE_TEST_KEY']);
+            file_put_contents(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'], getenv('PRIVATE_TEST_KEY'));
         }
         if (!file_exists(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'])) {
-            file_put_contents(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'], $_ENV['PUBLIC_TEST_KEY']);
+            file_put_contents(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'], getenv('PUBLIC_TEST_KEY'));
         }
     }
     (new HttpKernel())->run();

@@ -97,7 +97,7 @@ services:
   #======================================================
   api:
     container_name: api
-    build: ./../../.docker
+    image: omegacode/jwt-secured-api-web-server:1.0
     volumes:
       - ${ROOT_DIR}:/var/www/html
     ports:
