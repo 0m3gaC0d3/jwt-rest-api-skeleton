@@ -2,8 +2,6 @@
 vendor/
 composer.lock
 composer.phar
-keys/*
-!keys/.gitkeep
 bin/*
 !bin/.gitkeep
 !bin/console
@@ -16,3 +14,4 @@ var/cache/*
 !var/cache/.gitkeep
 var/log/*
 !var/log/.gitkeep
+*.pem

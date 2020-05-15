@@ -8,6 +8,15 @@ use OmegaCode\JwtSecuredApiCore\Core\Kernel\HttpKernel;
     define('APP_ROOT_PATH', dirname(__DIR__, 1) . '/');
     require APP_ROOT_PATH . 'vendor/autoload.php';
     $envFile = $_ENV['APPLICATION_ENVIRONMENT'] === 'test' ? '.env.test' : '.env';
+    // Create test keys if not present.
+    if ($_ENV['APPLICATION_ENVIRONMENT'] === 'test') {
+        if (!file_exists(APP_ROOT_PATH.$_ENV['PRIVATE_KEY_PATH'])) {
+            file_put_contents($_ENV['PRIVATE_KEY_PATH'], APP_ROOT_PATH.$_ENV['PRIVATE_TEST_KEY']);
+        }
+        if (!file_exists(APP_ROOT_PATH.$_ENV['PUBLIC_KEY_PATH'])) {
+            file_put_contents($_ENV['PUBLIC_KEY_PATH'], APP_ROOT_PATH.$_ENV['PUBLIC_TEST_KEY']);
+        }
+    }
     (new \Symfony\Component\Dotenv\Dotenv())->loadEnv(APP_ROOT_PATH . $envFile);
     (new HttpKernel())->run();
 })();
