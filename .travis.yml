@@ -21,9 +21,6 @@ before_script:
 
 script:
   - >
-    echo="_____________________________________"
-    echo="${PRIVATE_TEST_KEY}"
-    echo="_____________________________________"
     echo "Running code quality tests";
     .ci/scripts/ciRunner.sh -s quality -p $TRAVIS_PHP_VERSION
 
