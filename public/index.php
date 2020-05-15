@@ -13,9 +13,11 @@ use OmegaCode\JwtSecuredApiCore\Core\Kernel\HttpKernel;
     if ($_ENV['APPLICATION_ENVIRONMENT'] === 'test') {
         if (!file_exists(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'])) {
             file_put_contents(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'], getenv('PRIVATE_TEST_KEY'));
+            chmod(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'], 0755);
         }
         if (!file_exists(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'])) {
             file_put_contents(APP_ROOT_PATH . $_ENV['PUBLIC_KEY_PATH'], getenv('PUBLIC_TEST_KEY'));
+            chmod(APP_ROOT_PATH . $_ENV['PRIVATE_KEY_PATH'], 0755);
         }
     }
     (new HttpKernel())->run();
