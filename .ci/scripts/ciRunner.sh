@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-
-echo "${PUBLIC_TEST_KEY}"
+echo -n "${PUBLIC_TEST_KEY}" | wc -c
 
 # Function to write a .env file in Build/docker
 # This is read by docker-compose and vars defined here are
