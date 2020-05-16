@@ -40,13 +40,12 @@ class StringUtility
 
     public static function camelCaseToSnakeCase(string $subject): string
     {
-        $matches = [];
-        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $subject, $matches);
-        $result = $matches[0];
-        foreach ($result as &$match) {
-            $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+        if (preg_match('/[A-Z]/', $subject) === 0) {
+            return $subject;
         }
 
-        return implode('_', $result);
+        return strtolower((string) preg_replace_callback('/([a-z])([A-Z])/', function ($matches) {
+            return ((string) $matches[1] ?? '') . '_' . strtolower((string) ($matches[2] ?? ''));
+        }, $subject));
     }
 }
