@@ -103,6 +103,4 @@ services:
     ports:
       - 80:80
     environment:
-      - PRIVATE_KEY
-      - PUBLIC_KEY
       - APP_ENV
