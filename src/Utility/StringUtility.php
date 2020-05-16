@@ -45,7 +45,7 @@ class StringUtility
         }
 
         return strtolower((string) preg_replace_callback('/([a-z])([A-Z])/', function ($matches) {
-            return $matches[1] ?? '' . '_' . strtolower((string) ($matches[2] ?? ''));
+            return ((string) $matches[1] ?? '') . '_' . strtolower((string) ($matches[2] ?? ''));
         }, $subject));
     }
 }
