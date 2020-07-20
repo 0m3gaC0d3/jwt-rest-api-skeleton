@@ -19,6 +19,13 @@ services:
   Monolog\Logger:
     synthetic: true
 
+  OmegaCode\JwtSecuredApiCore\Core\Api:
+    class: OmegaCode\JwtSecuredApiCore\Core\Api
+    arguments:
+      - '@Slim\App'
+      - '@Symfony\Component\EventDispatcher\EventDispatcher'
+      - '@service_container'
+
   OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand:
     tags:
       - { name: 'console.command', command: 'cache:clear' }
