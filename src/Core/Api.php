@@ -34,6 +34,7 @@ use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
+use OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -94,12 +95,15 @@ class Api
     private function addMiddlewares(RouteInterface $router, array $middlewares): void
     {
         if (count($middlewares) === 0) {
+            $router->add(SQLLoggerMiddleware::class);
+
             return;
         }
         /** @var string $middleware */
         foreach ($middlewares as $middleware) {
             $router->add($middleware);
         }
+        $router->add(SQLLoggerMiddleware::class);
     }
 
     private function getActionService(string $serviceId): AbstractAction

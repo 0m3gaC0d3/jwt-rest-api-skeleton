@@ -15,3 +15,16 @@ services:
       - ./conf:/var/www/html/conf:cached
       - ./keys:/var/www/html/keys:cached
       - ./bin:/var/www/html/bin:cached
+  db:
+    image: mariadb:10.1
+    command: mysqld --character-set-server=utf8
+    ports:
+      - 3306:3306
+    volumes:
+      - .database:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DATABASE=application

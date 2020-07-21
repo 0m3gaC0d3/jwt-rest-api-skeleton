@@ -26,37 +26,11 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Utility;
+namespace OmegaCode\JwtSecuredApiCore\Service;
 
-class StringUtility
+use Doctrine\DBAL\Connection;
+
+interface DatabaseServiceInterface
 {
-    public static function snakeCaseToCamelCase(string $subject): string
-    {
-        $subject = str_replace(' ', '', ucwords(str_replace('_', ' ', $subject)));
-        $subject[0] = strtolower($subject[0]);
-
-        return $subject;
-    }
-
-    public static function camelCaseToSnakeCase(string $subject): string
-    {
-        if (preg_match('/[A-Z]/', $subject) === 0) {
-            return $subject;
-        }
-
-        return strtolower((string) preg_replace_callback('/([a-z])([A-Z])/', function ($matches) {
-            return ((string) $matches[1] ?? '') . '_' . strtolower((string) ($matches[2] ?? ''));
-        }, $subject));
-    }
-
-    /**
-     * @param mixed $from
-     * @param mixed $to
-     */
-    public static function strReplaceFirst($from, $to, string $content): string
-    {
-        $from = '/' . preg_quote($from, '/') . '/';
-
-        return (string) preg_replace($from, $to, $content, 1);
-    }
+    public function getConnection(): Connection;
 }

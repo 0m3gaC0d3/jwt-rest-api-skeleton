@@ -19,6 +19,15 @@ services:
   Monolog\Logger:
     synthetic: true
 
+  OmegaCode\JwtSecuredApiCore\Service\DatabaseService:
+    arguments:
+      $databaseName: '%env(string:DATABASE)%'
+      $user: '%env(string:USER)%'
+      $password: '%env(string:PASSWORD)%'
+      $host: '%env(string:HOST)%'
+      $driver: '%env(string:DRIVER)%'
+      $enableLog: '%env(bool:ENABLE_SQL_LOG)%'
+
   OmegaCode\JwtSecuredApiCore\Core\Api:
     class: OmegaCode\JwtSecuredApiCore\Core\Api
     arguments:
