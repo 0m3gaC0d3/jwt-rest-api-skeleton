@@ -60,7 +60,9 @@ class SQLLogger implements \Doctrine\DBAL\Logging\SQLLogger
 
     public function stopQuery(): void
     {
-        $this->currentQuery['time'] = \microtime(true) - $this->currentQuery['time'];
+        $this->currentQuery['time'] = $this->microTimeFormat(
+            \microtime(true) - $this->currentQuery['time']
+        );
         $this->totalTime += $this->currentQuery['time'];
         $this->queries[] = $this->currentQuery;
     }
@@ -84,5 +86,10 @@ class SQLLogger implements \Doctrine\DBAL\Logging\SQLLogger
         }
 
         return $result;
+    }
+
+    protected function microTimeFormat(float $time): string
+    {
+        return number_format($time * 1000, 2);
     }
 }
