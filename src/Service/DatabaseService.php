@@ -28,19 +28,69 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Service;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use OmegaCode\JwtSecuredApiCore\Logging\SQL\SQLLogger;
 
-class DatabaseService
+class DatabaseService implements DatabaseServiceInterface
 {
+    protected string $databaseName = '';
+
+    protected string $user = '';
+
+    protected string $password = '';
+
+    protected string $host = '';
+
+    protected string $driver = '';
+
+    protected bool $enableLog = false;
+
+    protected ?Connection $connection = null;
+
+    public function __construct(
+        string $databaseName,
+        string $user,
+        string $password,
+        string $host,
+        string $driver,
+        bool $enableLog
+    ) {
+        $this->databaseName = $databaseName;
+        $this->user = $user;
+        $this->password = $password;
+        $this->host = $host;
+        $this->driver = $driver;
+        $this->enableLog = $enableLog;
+    }
+
     public function getConnection(): Connection
     {
-        return DriverManager::getConnection([
-            'dbname' => $_ENV['DATABASE'],
-            'user' => $_ENV['USER'],
-            'password' => $_ENV['PASSWORD'],
-            'host' => $_ENV['HOST'],
-            'driver' => $_ENV['DRIVER'],
-        ]);
+        return is_null($this->connection) ? $this->createConnection() : $this->connection;
+    }
+
+    protected function createConnection(): Connection
+    {
+        $connection = DriverManager::getConnection([
+            'dbname' => $this->databaseName,
+            'user' => $this->user,
+            'password' => $this->password,
+            'host' => $this->host,
+            'driver' => $this->driver,
+        ], $this->createConfiguration());
+        $this->connection = $connection;
+
+        return $connection;
+    }
+
+    protected function createConfiguration(): Configuration
+    {
+        $configuration = new Configuration();
+        if ($this->enableLog) {
+            $configuration->setSQLLogger(new SQLLogger());
+        }
+
+        return $configuration;
     }
 }
