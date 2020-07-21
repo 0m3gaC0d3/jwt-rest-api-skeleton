@@ -52,8 +52,9 @@ class SQLLoggerMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $response = $handler->handle($request);
         if (!((bool) $_ENV['ENABLE_SQL_LOG'])) {
-            return $handler->handle($request);
+            return $response;
         }
         $logDirectory = APP_ROOT_PATH . 'var/log/';
         $fileName = str_replace('%', (string) time(), self::FILE_NAME_TEMPLATE);
@@ -66,7 +67,7 @@ class SQLLoggerMiddleware implements MiddlewareInterface
             $this->logger->error('Could not create SQL log file');
         }
 
-        return $handler->handle($request);
+        return $response;
     }
 
     protected function buildLogContent(array $queries, float $totalTime): string

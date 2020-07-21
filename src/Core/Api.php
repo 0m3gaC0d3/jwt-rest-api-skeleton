@@ -94,16 +94,14 @@ class Api
 
     private function addMiddlewares(RouteInterface $router, array $middlewares): void
     {
+        $router->add(SQLLoggerMiddleware::class);
         if (count($middlewares) === 0) {
-            $router->add(SQLLoggerMiddleware::class);
-
             return;
         }
         /** @var string $middleware */
         foreach ($middlewares as $middleware) {
             $router->add($middleware);
         }
-        $router->add(SQLLoggerMiddleware::class);
     }
 
     private function getActionService(string $serviceId): AbstractAction
