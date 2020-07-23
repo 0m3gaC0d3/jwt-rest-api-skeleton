@@ -55,13 +55,13 @@ class RsaJWTAuth extends AbstractJWTAuth
         return new Key((string) file_get_contents($this->privateKeyPath));
     }
 
-    public function getVerifyKey(): string
+    public function getVerifyKey(): Key
     {
         if (!file_exists($this->publicKeyPath)) {
             throw new FileNotFoundException('Could not find private key in path: ' . $this->publicKeyPath);
         }
 
-        return $this->publicKeyPath;
+        return new Key((string) file_get_contents($this->publicKeyPath));
     }
 
     public function getSigner(): Signer

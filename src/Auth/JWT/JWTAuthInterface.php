@@ -44,7 +44,7 @@ interface JWTAuthInterface
 
     public function getSignerKey(): Key;
 
-    public function getVerifyKey(): string;
+    public function getVerifyKey(): Key;
 
     public function getSigner(): Signer;
 }

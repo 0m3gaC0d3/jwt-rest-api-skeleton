@@ -76,7 +76,7 @@ abstract class AbstractJWTAuth implements JWTAuthInterface
     {
         try {
             $token = $this->createParsedToken($accessToken);
-            if (!$token->verify($this->getSigner(), $this->getVerifyKey())) {
+            if (!$token->verify($this->getSigner(), $this->getVerifyKey()->getContent())) {
                 // Token signature is not valid
                 return false;
             }
