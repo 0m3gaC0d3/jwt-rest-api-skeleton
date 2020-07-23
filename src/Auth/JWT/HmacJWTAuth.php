@@ -47,9 +47,9 @@ class HmacJWTAuth extends AbstractJWTAuth
         return new Key($this->key);
     }
 
-    public function getVerifyKey(): string
+    public function getVerifyKey(): Key
     {
-        return $this->key;
+        return new Key($this->key);
     }
 
     public function getSigner(): Signer
