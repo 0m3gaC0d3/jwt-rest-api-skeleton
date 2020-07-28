@@ -30,10 +30,13 @@ namespace OmegaCode\JwtSecuredApiCore\Core;
 
 use Exception;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
+use OmegaCode\JwtSecuredApiCore\Event\Initialization\APIPostInitializationEvent;
+use OmegaCode\JwtSecuredApiCore\Event\Initialization\APIPreInitializationEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PostRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
+use OmegaCode\JwtSecuredApiCore\Middleware\CORSMiddleware;
 use OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use Psr\Container\ContainerInterface;
@@ -63,6 +66,7 @@ class Api
         $this->eventDispatcher = $eventDispatcher;
         $this->cache = CacheAdapterFactory::build();
         $this->container = $container;
+        $this->initialize();
     }
 
     public function addRoute(string $method, Configuration $config): void
@@ -90,6 +94,21 @@ class Api
             }
         );
         $this->addMiddlewares($router, array_reverse($config->getMiddlewares()));
+    }
+
+    protected function initialize(): void
+    {
+        $this->eventDispatcher->dispatch(
+            new APIPreInitializationEvent($this->slimApp),
+            APIPreInitializationEvent::NAME
+        );
+        if ((bool) $_ENV['ENABLE_CORS']) {
+            $this->slimApp->add(CORSMiddleware::class);
+        }
+        $this->eventDispatcher->dispatch(
+            new APIPostInitializationEvent($this->slimApp),
+            APIPostInitializationEvent::NAME
+        );
     }
 
     private function addMiddlewares(RouteInterface $router, array $middlewares): void
