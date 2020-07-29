@@ -21,11 +21,11 @@ services:
 
   OmegaCode\JwtSecuredApiCore\Service\DatabaseService:
     arguments:
-      $databaseName: '%env(string:DATABASE)%'
-      $user: '%env(string:USER)%'
-      $password: '%env(string:PASSWORD)%'
-      $host: '%env(string:HOST)%'
-      $driver: '%env(string:DRIVER)%'
+      $databaseName: '%env(string:DATABASE_NAME)%'
+      $user: '%env(string:DATABASE_USER)%'
+      $password: '%env(string:DATABASE_PASSWORD)%'
+      $host: '%env(string:DATABASE_HOST)%'
+      $driver: '%env(string:DATABASE_DRIVER)%'
       $enableLog: '%env(bool:ENABLE_SQL_LOG)%'
 
   OmegaCode\JwtSecuredApiCore\Core\Api:
