@@ -26,6 +26,7 @@ services:
       $password: '%env(string:DATABASE_PASSWORD)%'
       $host: '%env(string:DATABASE_HOST)%'
       $driver: '%env(string:DATABASE_DRIVER)%'
+      $charSet: '%env(string:DATABASE_CHARSET)%'
       $enableLog: '%env(bool:ENABLE_SQL_LOG)%'
 
   OmegaCode\JwtSecuredApiCore\Core\Api:

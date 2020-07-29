@@ -45,6 +45,8 @@ class DatabaseService implements DatabaseServiceInterface
 
     protected string $driver = '';
 
+    protected string $charSet = '';
+
     protected bool $enableLog = false;
 
     protected ?Connection $connection = null;
@@ -55,6 +57,7 @@ class DatabaseService implements DatabaseServiceInterface
         string $password,
         string $host,
         string $driver,
+        string $charSet,
         bool $enableLog
     ) {
         $this->databaseName = $databaseName;
@@ -62,6 +65,7 @@ class DatabaseService implements DatabaseServiceInterface
         $this->password = $password;
         $this->host = $host;
         $this->driver = $driver;
+        $this->charSet = $charSet;
         $this->enableLog = $enableLog;
     }
 
@@ -78,6 +82,7 @@ class DatabaseService implements DatabaseServiceInterface
             'password' => $this->password,
             'host' => $this->host,
             'driver' => $this->driver,
+            'charset' => $this->charSet,
         ], $this->createConfiguration());
         $this->connection = $connection;
 
