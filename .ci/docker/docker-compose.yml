@@ -62,7 +62,7 @@ services:
           echo \"Running phpmd...\";
           vendor/bin/phpmd src text phpmd.xml;
           echo \"Running phpstan...\";
-          vendor/bin/phpstan analyse -c phpstan.neon --autoload-file=vendor/autoload.php -l max src
+          vendor/bin/phpstan analyse -c phpstan.neon
       "
   #======================================================
   # Unit tests
