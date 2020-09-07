@@ -41,6 +41,7 @@ class CORSMiddleware implements MiddlewareInterface
 
         return $response
             ->withHeader('Access-Control-Allow-Origin', $_ENV['CORS_ORIGIN'] ?? '*')
+            ->withHeader('Access-Control-Allow-Credentials', $_ENV['CORS_ALLOW_CREDENTIALS'] ?? 'false')
             ->withHeader(
                 'Access-Control-Allow-Headers',
                 $_ENV['CORS_HEADERS'] ?? 'X-Requested-With, Content-Type, Accept, Origin, Authorization'
