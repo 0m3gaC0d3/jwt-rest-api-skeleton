@@ -2,10 +2,10 @@ routes:
   -
     name: auth.login
     route: /auth
-    methods: [post]
+    methods: [post,options]
     action: OmegaCode\JwtSecuredApiCore\Action\Auth\LoginAction
   -
     name: auth.verify
     route: /auth/verify
-    methods: [post]
+    methods: [post,options]
     action: OmegaCode\JwtSecuredApiCore\Action\Auth\VerifyAction

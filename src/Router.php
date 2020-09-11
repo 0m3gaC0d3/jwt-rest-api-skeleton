@@ -36,7 +36,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Router implements RouterInterface
 {
-    public const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch'];
+    public const ALLOWED_METHODS = ['get', 'post', 'put', 'delete', 'patch', 'options'];
 
     private Api $api;
 
