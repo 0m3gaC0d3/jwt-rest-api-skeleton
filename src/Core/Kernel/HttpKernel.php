@@ -28,6 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Core\Kernel;
 
+use InvalidArgumentException;
 use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
 use OmegaCode\JwtSecuredApiCore\Error\AbstractErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
@@ -94,6 +95,15 @@ class HttpKernel extends AbstractKernel
 
     protected function getConcreteAuth(): JWTAuthInterface
     {
-        return $_ENV['APP_ENV'] === 'test' ? JWTAuthFactory::buildHmacAuth() : JWTAuthFactory::buildRsaAuth();
+        $supportedSigners = ['RSA', 'HMAC'];
+        $signer = strtoupper(trim($_ENV['JWT_SIGNER']));
+        switch ($signer) {
+            case 'RSA':
+                return JWTAuthFactory::buildRsaAuth();
+            case 'HMAC':
+                return JWTAuthFactory::buildHmacAuth();
+            default:
+                throw new InvalidArgumentException("The given signer \"$signer\" is not supported. Supported signers are: " . implode(', ', $supportedSigners));
+        }
     }
 }

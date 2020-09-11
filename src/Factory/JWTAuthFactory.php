@@ -48,7 +48,7 @@ class JWTAuthFactory
         return new HmacJWTAuth(
             (string) $_ENV['JWT_ISSUER'],
             (int) $_ENV['JWT_LIFETIME'],
-            $_ENV['KEY']
+            $_ENV['HMAC_SECRET']
         );
     }
 }
