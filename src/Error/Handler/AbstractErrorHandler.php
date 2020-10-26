@@ -26,7 +26,7 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Error;
+namespace OmegaCode\JwtSecuredApiCore\Error\Handler;
 
 use Exception;
 use Psr\Log\LoggerInterface;

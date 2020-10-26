@@ -344,6 +344,41 @@ To enable logging simply set the environment variable `ENABLE_LOG` to `1`. The l
 
 Each error comes wrapped in JSON to ensure better/consistent API experiences for your clients.
 
+### Overriding error formatting
+
+You can control the formatting of occurring errors.
+To do so decorate `\OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer` like this:
+
+*services.yaml*
+```yaml
+services:
+  #...
+  Vednor\Project\Error\Handler\MyCustomErrorHandler:
+    decorates: OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer
+```
+
+*MyCustomErrorHandler.php*
+```php
+<?php
+declare(strict_types=1);
+
+namespace Vednor\Project\Error\Handler;
+
+use OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer;
+use Throwable;
+
+class MyCustomErrorHandler extends ApiErrorRenderer
+{
+    protected function buildErrorResponseData(Throwable $exception, bool $displayErrorDetails): array
+    {
+        return [
+            'message' => $exception->getMessage(),
+            'code' => $exception->getCode()
+        ];
+    }
+}
+```
+
 ## GraphQL
 
 If you want to use [GraphQL](https://wikipedia.org/wiki/GraphQL),

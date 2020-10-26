@@ -26,11 +26,11 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Error;
+namespace OmegaCode\JwtSecuredApiCore\Error\Handler;
 
 class LowLevelErrorHandler extends AbstractErrorHandler
 {
-    private float $startTime = 0;
+    private float $startTime;
 
     public function __construct(bool $showErrors, bool $logErrors)
     {
