@@ -353,21 +353,21 @@ To do so decorate `\OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer` 
 ```yaml
 services:
   #...
-  Vednor\Project\Error\Handler\MyCustomErrorHandler:
+  Vendor\MyProject\MyCustomErrorRenderer:
     decorates: OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer
 ```
 
-*MyCustomErrorHandler.php*
+*MyCustomErrorRenderer.php*
 ```php
 <?php
 declare(strict_types=1);
 
-namespace Vednor\Project\Error\Handler;
+namespace Vendor\MyProject;
 
 use OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer;
 use Throwable;
 
-class MyCustomErrorHandler extends ApiErrorRenderer
+class MyCustomErrorRenderer extends ApiErrorRenderer
 {
     protected function buildErrorResponseData(Throwable $exception, bool $displayErrorDetails): array
     {
