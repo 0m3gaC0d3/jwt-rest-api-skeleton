@@ -26,8 +26,9 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Error;
+namespace OmegaCode\JwtSecuredApiCore\Error\Handler;
 
+use ReflectionClass;
 use Slim\Interfaces\ErrorRendererInterface;
 use Throwable;
 
@@ -38,8 +39,15 @@ class ApiErrorRenderer extends AbstractErrorHandler implements ErrorRendererInte
         if (!is_null($this->logger) && $this->logErrors) {
             $this->logger->error($exception->getMessage());
         }
+
+        return $this->buildJsonResponse($this->buildErrorResponseData($exception, $displayErrorDetails));
+    }
+
+    protected function buildErrorResponseData(Throwable $exception, bool $displayErrorDetails): array
+    {
         $severity = (static::ERROR_TYPE_MAPPING[$exception->getCode()] ?? 'Error');
         $response = ['status' => $this->getStatus($exception), 'message' => $exception->getMessage()];
+        $response['type'] = (new ReflectionClass($exception))->getShortName();
         if ($displayErrorDetails) {
             $response = array_merge($response, [
                 'message' => $exception->getMessage(),
@@ -50,7 +58,7 @@ class ApiErrorRenderer extends AbstractErrorHandler implements ErrorRendererInte
             ]);
         }
 
-        return $this->buildJsonResponse($response);
+        return $response;
     }
 
     private function getStatus(Throwable $exception): int

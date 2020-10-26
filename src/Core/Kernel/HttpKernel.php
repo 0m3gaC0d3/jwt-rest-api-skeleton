@@ -30,8 +30,8 @@ namespace OmegaCode\JwtSecuredApiCore\Core\Kernel;
 
 use InvalidArgumentException;
 use OmegaCode\JwtSecuredApiCore\Auth\JWT\JWTAuthInterface;
-use OmegaCode\JwtSecuredApiCore\Error\AbstractErrorHandler;
-use OmegaCode\JwtSecuredApiCore\Error\LowLevelErrorHandler;
+use OmegaCode\JwtSecuredApiCore\Error\Handler\AbstractErrorHandler;
+use OmegaCode\JwtSecuredApiCore\Error\Handler\LowLevelErrorHandler;
 use OmegaCode\JwtSecuredApiCore\Event\Kernel\PostKernelInitializationEvent;
 use OmegaCode\JwtSecuredApiCore\Event\Kernel\PreKernelInitializationEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\ApiFactory;
@@ -58,7 +58,7 @@ class HttpKernel extends AbstractKernel
                 AbstractErrorHandler::DEFAULT_RESPONSE;
             die();
         }
-        (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], false));
+        (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG']));
         parent::__construct();
     }
 

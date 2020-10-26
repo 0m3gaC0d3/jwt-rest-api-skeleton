@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Factory;
 
-use OmegaCode\JwtSecuredApiCore\Error\ApiErrorRenderer;
+use OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Slim\App as API;
