@@ -50,6 +50,9 @@ class JsonWebTokenMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        if (((bool) $_ENV['ENABLE_JWT']) === false) {
+            return $handler->handle($request);
+        }
         $authorization = explode(' ', (string) $request->getHeaderLine('Authorization'));
         $token = $authorization[1] ?? '';
         if (!$token || !$this->jsonWebTokenAuth->validateToken($token)) {

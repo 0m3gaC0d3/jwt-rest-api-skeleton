@@ -3,7 +3,7 @@
 # Simple JWT secured API Core
 This is the core component of the simple jwt based API skeleton to kick start your API development.
 It is based on the PHP micro framework [Slim 4](http://www.slimframework.com/)
- and some well known [Symfony 5](https://symfony.com/) components.
+ and some well-known [Symfony 5](https://symfony.com/) components.
 
 The skeleton comes also bundled with [DI (dependency injection)](https://symfony.com/doc/current/components/dependency_injection.html)
  and [Doctrine DBAL](https://www.doctrine-project.org/projects/doctrine-dbal/en/2.10/index.html).
@@ -17,21 +17,21 @@ The skeleton comes also bundled with [DI (dependency injection)](https://symfony
 
 ## Application workflow / design
 
-This framework uses the [ADR](https://wikipedia.org/wiki/Action%E2%80%93domain%E2%80%93responder) 
+This framework uses the [ADR](https://wikipedia.org/wiki/Action%E2%80%93domain%E2%80%93responder)
 pattern to provide API endpoints. This means: each endpoint and HTTP method results in a single action file.
 
-The framework provides an easy workflow to create robust and scalable REST-APIs (There is even GraphQL support). 
+The framework provides an easy workflow to create robust and scalable REST-APIs (There is even GraphQL support).
 
 Almost every part of the framework is extendable by using symfony events, service decoration or middlewares.
 
 ### Http kernel
 
-For each HTTP based request the HTTTP-Kernel is used to bootstrap the application. it provides DI, 
-the underlaying slim framework and route configurations.
+For each HTTP based request the HTTP-Kernel is used to bootstrap the application. it provides DI,
+the underlying slim framework and route configurations.
 
 ### CLI kernel
 
-The CLI-Kernel is used to bootstrap symfony commands or testing frameworks. 
+The CLI-Kernel is used to bootstrap symfony commands or testing frameworks.
 It bootstraps the application without the HTTP components (Slim, Routes, etc.).
 
 ## Setup
@@ -57,13 +57,13 @@ The configuration folder should contain two `.yml` files.
 
 ### Add your environment variables
 
-Next you need to provide some environment variables. 
+Next you need to provide some environment variables.
 This can be archived by copying the `.env.dist` file of the core and save it as `.env` in the root of your project.
 Adjust each value of the file to your needs.
 
 ### Build
 
-Finally you have to build your project by running  `composer install`.
+Finally, you have to build your project by running  `composer install`.
 
 ### Create public and private key for JWT
 
@@ -90,14 +90,14 @@ routes:
 (Check out the [Slim Documentation](http://www.slimframework.com/docs/v4/objects/routing.html) the see all possibilities).
 * `methods`: Next you can provide one or more HTTP-Methods to listen to. Other methods calling this endpoint resulting in 400 errors.
 * `action`: This is the actual implementation of your action class. Simple enter the FQCN of your action.
-* `middlewares`: Here you can provide middlewares to extend the request behavior. 
+* `middlewares`: Here you can provide middlewares to extend the request behavior.
 To protect your route with JWT, add the following middle ware: `OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware`.
-There are also middlewares for caching HTML or JSON responses (`OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware` 
+There are also middlewares for caching HTML or JSON responses (`OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware`
 and `OmegaCode\JwtSecuredApiCore\Middleware\CacheableHTMLMiddleware`.
 
 ### Create an action
 
-The action class is used to handle the request to a single route.
+To handle the request and business logic of a single route we use so called actions.
 
 An action can look like this:
 ````php
@@ -222,24 +222,24 @@ services:
 The framework caches some work to increase the response speed of your API.
 
 The following is a list of all cached parts of the core
-* `Request cache`: You can cache a request by providing cacheable middlewares 
-(`OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware`, `OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware`) 
-to your route configuration. 
+* `Request cache`: You can cache a request by providing cacheable middlewares
+(`OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware`, `OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware`)
+to your route configuration.
 Remember to enable that feature by setting the environment variable `ENABLE_REQUEST_CACHE` to `1`
 
-* `System cache`: The system cache stores the configuration directories of each package related to the core. 
-This process is really expensive in terms of time. 
+* `System cache`: The system cache stores the configuration directories of each package related to the core.
+This process is really expensive in terms of time.
 For debugging purposes you can disable this cache by setting `ENABLE_SYSTEM_CACHE` to `1`.
 
 ### Cache options
 
 The `.env` file contains two more variables about caching
 
-* `CACHE_ADAPTER_CLASS`: The framework uses the 
-[symfony cache component](https://symfony.com/doc/current/components/cache.html) to cache data. 
-This enables you to define the actual storage of the cache (File, APCu, Redis...). 
+* `CACHE_ADAPTER_CLASS`: The framework uses the
+[symfony cache component](https://symfony.com/doc/current/components/cache.html) to cache data.
+This enables you to define the actual storage of the cache (File, APCu, Redis...).
 To change the actual cache implementation of the core, this environment variable is given. Simple change the FQCN with the one you need.
-(*This is going to change soon*) 
+(*This is going to change soon*)
 * `REQUEST_CACHE_LIFE_TIME`: This environment variable is used to define the live time of the request cache.
 (*This is going to change soon*)
 
@@ -249,8 +249,8 @@ To clear the cache of the application a command can be used (`bin/console cache:
 
 ## Auth / JWT
 
-The core comes with [JWT](https://wikipedia.org/wiki/JSON_Web_Token) support. 
-To enable a JWT secured rout simply add the following middleware: 
+The core comes with [JWT](https://wikipedia.org/wiki/JSON_Web_Token) support.
+To enable a JWT secured rout simply add the following middleware:
 `OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware`
 
 To create the signature a private and a public key is needed.
@@ -263,7 +263,7 @@ Clients are defined in the `clients.json` in the root of your project (Never com
 This file contains the configuration of your API clients. A client record contains of the following properties:
 * `ip`: (*optional*) Used to restrict access to client IP address.
 * `secret`: This is the key your clients need to obtain tokens by the API.
-* `permissions`: (*optional*) An array of permissions (strings). 
+* `permissions`: (*optional*) An array of permissions (strings).
 How your application reacts to those values is left by you. They are a part of the claims of the token.
 
 It is recommended to generate new clients using the following command:
@@ -302,19 +302,25 @@ The response of this request contains a json object like the following:
 }
 ````
 
+### Disable JWT
+
+Sometimes you might want to disable JWT during development or simply don´t need that feature.
+To do so, there is an environment variable called `ENABLE_JWT`.
+Be aware, this option will not remove the corresponding auth routes.
+
 ## Extendability
 
-One of the main goals of this framework is extendability. To archive this well known systems have been integrated.
+One of the main goals of this framework is extendability. To archive this well-known systems have been integrated.
 
 ### Symfony events
 
 [Symfony events](https://symfony.com/doc/current/components/event_dispatcher.html) are used to extend the system without
  using something like subclassing or other methods. A good example for core usage is the route collection.
- 
+
 Following a list of all existing events:
-* `route_collection.filled`: This event is used to manipulate routes.
-* `request.pre`: This event is used to manipulate the request / response before the action executes
-* `request.post`: This event is used to manipulate the request / response after the action executes
+* `route_collection.filled`: Manipulate routes.
+* `request.pre`: Manipulate the request / response before the action executes
+* `request.post`: Manipulate the request / response after the action executes
 * `kernel.pre`: This event is triggered early in the process of building the HTTP kernel.
 * `kernel.post`: This event is triggered directly before Slim kicks in.
 
@@ -326,8 +332,8 @@ Following a list of all existing events:
 
 ### DI
 
-[Symfony Dependency injection](https://symfony.com/doc/current/components/dependency_injection.html) provides a way 
-to extend the core. You can [decorate](https://symfony.com/doc/current/service_container/service_decoration.html) 
+[Symfony Dependency injection](https://symfony.com/doc/current/components/dependency_injection.html) provides a way
+to extend the core. You can [decorate](https://symfony.com/doc/current/service_container/service_decoration.html)
 any service (Note that each action is also a service) to add custom code.
 
 ## Logging
@@ -336,10 +342,10 @@ To enable logging simply set the environment variable `ENABLE_LOG` to `1`. The l
 
 ## Errors
 
-Each error comes wrapped in JSON to ensure a better/consistent API experience for your clients.
+Each error comes wrapped in JSON to ensure better/consistent API experiences for your clients.
 
 ## GraphQL
 
-If you want to use [GraphQL](https://wikipedia.org/wiki/GraphQL), 
-simply run  `composer require omegacode/jwt-secured-api-graphql`. 
+If you want to use [GraphQL](https://wikipedia.org/wiki/GraphQL),
+simply run  `composer require omegacode/jwt-secured-api-graphql`.
 Read the documentation of the project for more information.
