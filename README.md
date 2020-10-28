@@ -361,6 +361,9 @@ services:
   #...
   Vendor\MyProject\MyCustomErrorRenderer:
     decorates: OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer
+    arguments:
+      $showErrors: '%env(bool:SHOW_ERRORS)%'
+      $logErrors: '%env(bool:ENABLE_LOG)%'
 ```
 
 *MyCustomErrorRenderer.php*
@@ -370,17 +373,21 @@ declare(strict_types=1);
 
 namespace Vendor\MyProject;
 
-use OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer;
-use Throwable;
+use OmegaCode\JwtSecuredApiCore\Error\Renderer\ErrorRendererInterface;use Throwable;
 
-class MyCustomErrorRenderer extends ApiErrorRenderer
+class MyCustomErrorRenderer implements ErrorRendererInterface
 {
-    protected function buildErrorResponseData(Throwable $exception, bool $displayErrorDetails): array
+    public function __invoke(Throwable $exception, bool $displayErrorDetails): string
     {
-        return [
-            'message' => $exception->getMessage(),
-            'code' => $exception->getCode()
-        ];
+        return json_encode([
+           'message' => $exception->getMessage(),
+           'code' => $exception->getCode()
+        ]);
+    }
+
+    public function getContentType(): string
+    {
+        return 'application/json';
     }
 }
 ```

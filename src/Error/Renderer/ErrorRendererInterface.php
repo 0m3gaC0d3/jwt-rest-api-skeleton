@@ -26,34 +26,9 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiCore\Factory;
+namespace OmegaCode\JwtSecuredApiCore\Error\Renderer;
 
-use OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer;
-use OmegaCode\JwtSecuredApiCore\Error\Renderer\ErrorRendererInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
-use Slim\App as API;
-use Slim\Factory\AppFactory;
-use Slim\Handlers\ErrorHandler;
-
-class ApiFactory
+interface ErrorRendererInterface extends \Slim\Interfaces\ErrorRendererInterface
 {
-    public static function build(ContainerInterface $container, LoggerInterface $logger): API
-    {
-        $api = AppFactory::create(null, $container);
-        $api->addBodyParsingMiddleware();
-        $errorMiddleware = $api->addErrorMiddleware(
-            (bool) $_ENV['SHOW_ERRORS'],
-            (bool) $_ENV['ENABLE_LOG'],
-            (bool) $_ENV['SHOW_ERRORS']
-        );
-        /** @var ErrorRendererInterface $errorRenderer */
-        $errorRenderer = $container->get(ApiErrorRenderer::class);
-        /** @var ErrorHandler $errorHandler */
-        $errorHandler = $errorMiddleware->getDefaultErrorHandler();
-        $errorHandler->forceContentType($errorRenderer->getContentType());
-        $errorHandler->registerErrorRenderer($errorRenderer->getContentType(), $errorRenderer);
-
-        return $api;
-    }
+    public function getContentType(): string;
 }
