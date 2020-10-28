@@ -28,8 +28,8 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Error\Handler;
 
+use OmegaCode\JwtSecuredApiCore\Error\Renderer\ErrorRendererInterface;
 use ReflectionClass;
-use Slim\Interfaces\ErrorRendererInterface;
 use Throwable;
 
 class ApiErrorRenderer extends AbstractErrorHandler implements ErrorRendererInterface
@@ -41,6 +41,11 @@ class ApiErrorRenderer extends AbstractErrorHandler implements ErrorRendererInte
         }
 
         return $this->buildJsonResponse($this->buildErrorResponseData($exception, $displayErrorDetails));
+    }
+
+    public function getContentType(): string
+    {
+        return 'application/json';
     }
 
     protected function buildErrorResponseData(Throwable $exception, bool $displayErrorDetails): array
