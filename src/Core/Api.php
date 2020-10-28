@@ -78,8 +78,18 @@ class Api
         /** @var RouteInterface $router */
         $router = $this->slimApp->$method(
             $config->getRoute(),
-            function (Request $request, Response $response) use ($action, $eventDispatcher, $cache, $cacheEnabled) {
+            function (
+                Request $request,
+                Response $response,
+                array $arguments
+            ) use (
+                $action,
+                $eventDispatcher,
+                $cache,
+                $cacheEnabled
+            ) {
                 $eventDispatcher->dispatch(new PreRequestEvent($request, $response), PreRequestEvent::NAME);
+                $action->setArguments($arguments);
                 $response = $action($request, $response);
                 $eventDispatcher->dispatch(new PostRequestEvent($request, $response), PostRequestEvent::NAME);
                 $identifier = RequestIDGenerator::generate($request);
