@@ -35,6 +35,7 @@ Options:
     -s <...>
         Specifies which test suite to run
             - build: Builds the project (composer)
+            - fix: Fixes some quality errors automatically.
             - lint: Lints the php files
             - unit (default): PHP unit tests
             - e2e: End to end tests
@@ -150,9 +151,9 @@ lint)
   SUITE_EXIT_CODE=$?
   docker-compose down
   ;;
-php-fix)
+fix)
   setUpDockerComposeDotEnv
-  docker-compose run php-fix
+  docker-compose run fix
   SUITE_EXIT_CODE=$?
   docker-compose down
   ;;

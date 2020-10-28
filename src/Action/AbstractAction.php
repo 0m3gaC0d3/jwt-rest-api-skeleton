@@ -28,10 +28,44 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Action;
 
+use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 abstract class AbstractAction
 {
+    protected array $arguments = [];
+
     abstract public function __invoke(Request $request, Response $response): Response;
+
+    public function getArguments(): array
+    {
+        return $this->arguments;
+    }
+
+    public function setArguments(array $arguments): void
+    {
+        $this->arguments = $arguments;
+    }
+
+    protected function hasArgument(string $name): bool
+    {
+        if (count($this->arguments) === 0) {
+            return false;
+        }
+
+        return in_array($name, array_keys($this->arguments));
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getArgument(string $name)
+    {
+        if (!$this->hasArgument($name)) {
+            throw new InvalidArgumentException("Argument with name \"$name\" does not exists.");
+        }
+
+        return $this->arguments[$name];
+    }
 }
