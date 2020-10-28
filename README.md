@@ -115,7 +115,7 @@ class AwesomeAction extends AbstractAction
 {
     public function __invoke(Request $request, Response $response): Response
     {
-        // Use teh following to access dynamic route arguments data.
+        // Use the following to access dynamic route arguments data.
         // $dynamicRouteArguments = $this->getArguments();
 
         $data = [
@@ -131,7 +131,8 @@ class AwesomeAction extends AbstractAction
 
 Note that your action must extend `OmegaCode\JwtSecuredApiCore\Action\AbstractAction`.
 
-> NOTE: Dynamic routes (`/my/route/{arg}`) arguments data can be accessed in any action by calling `$this->getArguments()`.
+> NOTE: Dynamic routes (`/my/route/{arg}`) arguments data can be accessed in any action
+> by calling `$this->getArguments()`.
 
 ## How to modify existing routes
 
