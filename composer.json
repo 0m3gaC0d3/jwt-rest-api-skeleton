@@ -22,7 +22,7 @@
         "symfony/yaml": "^5.0",
         "symfony/event-dispatcher": "^5.0",
         "http-interop/http-factory-guzzle": "^1.0",
-        "lcobucci/jwt": "^3.3",
+        "lcobucci/jwt": "3.3.*",
         "cakephp/chronos": "^2.0",
         "monolog/monolog": "^2.0",
         "ramsey/uuid": "^3.9",
