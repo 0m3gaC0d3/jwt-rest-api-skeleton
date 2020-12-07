@@ -50,7 +50,6 @@ class RequestLoggerMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $response = $handler->handle($request);
         $logFilePath = APP_ROOT_PATH . 'var/log/' . self::LOG_FILE_NAME;
         try {
             if (!file_exists($logFilePath)) {
@@ -61,7 +60,7 @@ class RequestLoggerMiddleware implements MiddlewareInterface
             $this->logger->error('Could not create SQL log file');
         }
 
-        return $response;
+        return $handler->handle($request);
     }
 
     protected function buildLogContent(ServerRequestInterface $request): string
