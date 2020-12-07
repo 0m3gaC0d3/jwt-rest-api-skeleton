@@ -87,7 +87,7 @@ class RequestLoggerMiddleware implements MiddlewareInterface
 
     protected function buildTargetUrl(UriInterface $uri): string
     {
-        return $uri->getScheme() . ':' . $uri->getHost() . $uri->getPath();
+        return $uri->getScheme() . '://' . $uri->getHost() . $uri->getPath();
     }
 
     /**
