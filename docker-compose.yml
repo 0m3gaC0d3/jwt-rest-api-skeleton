@@ -15,6 +15,7 @@ services:
       - ./conf:/var/www/html/conf:cached
       - ./keys:/var/www/html/keys:cached
       - ./bin:/var/www/html/bin:cached
+      - ./var:/var/www/html/var:cached
   db:
     image: mariadb:10.1
     command: mysqld --character-set-server=utf8
