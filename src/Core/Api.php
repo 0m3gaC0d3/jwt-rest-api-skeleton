@@ -37,6 +37,7 @@ use OmegaCode\JwtSecuredApiCore\Event\Request\PreRequestEvent;
 use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use OmegaCode\JwtSecuredApiCore\Middleware\CORSMiddleware;
+use OmegaCode\JwtSecuredApiCore\Middleware\RequestLoggerMiddleware;
 use OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use Psr\Container\ContainerInterface;
@@ -112,6 +113,9 @@ class Api
             new APIPreInitializationEvent($this->slimApp),
             APIPreInitializationEvent::NAME
         );
+        if ((bool) $_ENV['ENABLE_REQUEST_LOG']) {
+            $this->slimApp->add(RequestLoggerMiddleware::class);
+        }
         if ((bool) $_ENV['ENABLE_CORS']) {
             $this->slimApp->add(CORSMiddleware::class);
         }
