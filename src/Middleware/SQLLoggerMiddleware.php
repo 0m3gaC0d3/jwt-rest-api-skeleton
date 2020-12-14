@@ -53,33 +53,23 @@ class SQLLoggerMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
-        if (!((bool) $_ENV['ENABLE_SQL_LOG'])) {
-            return $response;
-        }
-        $logDirectory = APP_ROOT_PATH . 'var/log/';
-        $fileName = str_replace('%', (string) time(), self::FILE_NAME_TEMPLATE);
-        /** @var SQLLogger $logger */
-        $logger = $this->databaseService->getConnection()->getConfiguration()->getSQLLogger();
-        $content = $this->buildLogContent($logger->getQueries(), $logger->getTotalTime());
         try {
-            file_put_contents($logDirectory . $fileName, $content);
+            /** @var SQLLogger $logger */
+            $logger = $this->databaseService->getConnection()->getConfiguration()->getSQLLogger();
+            $queries = $logger->getQueries();
+            if (count($queries) === 0) {
+                return $response;
+            }
+            foreach ($queries as $query) {
+                $this->logger->info(($query['sql'] ?? '?') . ';', [
+                    'params' => $query['params'] ?? [],
+                    'executionTime' => ($query['time'] ?? '?') . 's',
+                ]);
+            }
         } catch (\Exception $e) {
-            $this->logger->error('Could not create SQL log file');
+            $this->logger->error('Could not log SQL: ' . $e->getMessage());
         }
 
         return $response;
-    }
-
-    protected function buildLogContent(array $queries, float $totalTime): string
-    {
-        $result = '';
-        foreach ($queries as $query) {
-            $result .= $query['sql'] . "\n";
-            $result .= 'execution time: ' . $query['time'] . "\n";
-            $result .= "===============================================\n";
-        }
-        $result .= 'Total execution time: ' . $totalTime . "\n";
-
-        return $result;
     }
 }

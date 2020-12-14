@@ -34,12 +34,18 @@ use Psr\Log\LoggerInterface;
 
 class LoggerFactory
 {
-    private const LOG_FILE_NAME = 'api.log';
-
     public static function build(): LoggerInterface
     {
         $logger = new Logger('API');
-        $logger->pushHandler(new StreamHandler(APP_ROOT_PATH . 'var/log/' . static::LOG_FILE_NAME, Logger::DEBUG));
+        $logger->pushHandler(new StreamHandler(APP_ROOT_PATH . 'var/log/api.log', Logger::DEBUG));
+
+        return $logger;
+    }
+
+    public static function buildSqlLogger(): LoggerInterface
+    {
+        $logger = new Logger('SQL');
+        $logger->pushHandler(new StreamHandler(APP_ROOT_PATH . 'var/log/sql.log', Logger::DEBUG));
 
         return $logger;
     }

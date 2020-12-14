@@ -19,6 +19,10 @@ services:
   Monolog\Logger:
     synthetic: true
 
+  api.sql.logger:
+    class: Monolog\Logger
+    factory: [ 'OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory', 'buildSqlLogger' ]
+
   OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer:
     arguments:
       $showErrors: '%env(bool:SHOW_ERRORS)%'
@@ -40,6 +44,10 @@ services:
       - '@Slim\App'
       - '@Symfony\Component\EventDispatcher\EventDispatcher'
       - '@service_container'
+
+  OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware:
+    arguments:
+      $logger: '@api.sql.logger'
 
   OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand:
     tags:
