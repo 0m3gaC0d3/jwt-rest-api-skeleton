@@ -113,12 +113,6 @@ class Api
             new APIPreInitializationEvent($this->slimApp),
             APIPreInitializationEvent::NAME
         );
-        if ((bool) $_ENV['ENABLE_REQUEST_LOG']) {
-            $this->slimApp->add(RequestLoggerMiddleware::class);
-        }
-        if ((bool) $_ENV['ENABLE_CORS']) {
-            $this->slimApp->add(CORSMiddleware::class);
-        }
         $this->eventDispatcher->dispatch(
             new APIPostInitializationEvent($this->slimApp),
             APIPostInitializationEvent::NAME
@@ -127,7 +121,15 @@ class Api
 
     private function addMiddlewares(RouteInterface $router, array $middlewares): void
     {
-        $router->add(SQLLoggerMiddleware::class);
+        if ((bool) $_ENV['ENABLE_REQUEST_LOG']) {
+            $this->slimApp->add(RequestLoggerMiddleware::class);
+        }
+        if ((bool) $_ENV['ENABLE_CORS']) {
+            $this->slimApp->add(CORSMiddleware::class);
+        }
+        if ((bool) $_ENV['ENABLE_SQL_LOG']) {
+            $router->add(SQLLoggerMiddleware::class);
+        }
         if (count($middlewares) === 0) {
             return;
         }
