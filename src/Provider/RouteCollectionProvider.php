@@ -71,7 +71,8 @@ class RouteCollectionProvider extends CachableDataProvider
 
     private function buildRouteCollection(): RouteCollection
     {
-        $configuration = $this->configurationFileService->load('routes.yaml');
+        $configurationFileName = $_ENV['APP_ENV'] === 'prod' ? 'routes.yaml' : 'routes.' . $_ENV['APP_ENV'] . '.yaml';
+        $configuration = $this->configurationFileService->load($configurationFileName);
 
         return CollectionFactory::build(
             (new RouteConfigurationProcessor())->process($configuration)

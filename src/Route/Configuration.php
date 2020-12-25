@@ -99,7 +99,7 @@ class Configuration implements \Serializable
     public function isCacheable(): bool
     {
         foreach ($this->middlewares as $middleware) {
-            $interfaces = class_implements($middleware);
+            $interfaces = (array) class_implements($middleware);
             if (isset($interfaces[CacheableMiddlewareInterface::class])) {
                 return true;
             }
