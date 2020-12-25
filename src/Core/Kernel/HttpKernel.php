@@ -56,7 +56,7 @@ class HttpKernel extends AbstractKernel
             header('Content-Type: application/json');
             echo (bool) $_ENV['SHOW_ERRORS'] ? '{"status": 500, "message": "Constant APP_ROOT_PATH is not defined"}' :
                 AbstractErrorHandler::DEFAULT_RESPONSE;
-            die();
+            exit();
         }
         (new LowLevelErrorHandler((bool) $_ENV['SHOW_ERRORS'], (bool) $_ENV['ENABLE_LOG']));
         parent::__construct();

@@ -57,7 +57,7 @@ class LowLevelErrorHandler extends AbstractErrorHandler
             ob_end_clean();
         }
         echo $this->outputErrorInformation($type, $message, $file, $line);
-        die();
+        exit();
     }
 
     public function shutdown(): void

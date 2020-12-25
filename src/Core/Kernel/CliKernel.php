@@ -41,7 +41,7 @@ class CliKernel extends AbstractKernel
             header('HTTP/1.1 500 Internal Server Error');
             header('Content-Type: application/json');
             echo 'Environment variable APP_ROOT_PATH is not set! CLI can not process.';
-            die();
+            exit();
         }
         parent::__construct();
     }
