@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ * Copyright (c) 2021 Wolf Utz<wpu@hotmail.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,8 @@ class Configuration implements \Serializable
 
     private string $route;
 
+    private bool $disabled;
+
     private array $allowedMethods;
 
     private array $middlewares;
@@ -46,12 +48,14 @@ class Configuration implements \Serializable
         string $name,
         string $action,
         string $route,
+        bool $disabled,
         array $allowedMethods,
         array $middlewares
     ) {
         $this->name = $name;
         $this->action = $action;
         $this->route = $route;
+        $this->disabled = $disabled;
         $this->allowedMethods = $allowedMethods;
         $this->middlewares = $middlewares;
     }
@@ -96,6 +100,16 @@ class Configuration implements \Serializable
         $this->middlewares = $middlewares;
     }
 
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
+    public function setDisabled(bool $disabled): void
+    {
+        $this->disabled = $disabled;
+    }
+
     public function isCacheable(): bool
     {
         foreach ($this->middlewares as $middleware) {
@@ -114,6 +128,7 @@ class Configuration implements \Serializable
             $this->name,
             $this->action,
             $this->route,
+            $this->disabled,
             $this->allowedMethods,
             $this->middlewares,
         ]);
@@ -128,7 +143,13 @@ class Configuration implements \Serializable
         $this->name = $data[0];
         $this->action = $data[1];
         $this->route = $data[2];
-        $this->allowedMethods = $data[3];
-        $this->middlewares = $data[4];
+        $this->disabled = (bool) $data[3];
+        $this->allowedMethods = $data[4];
+        $this->middlewares = $data[5];
+    }
+
+    public function toArray(): array
+    {
+        return get_object_vars($this);
     }
 }

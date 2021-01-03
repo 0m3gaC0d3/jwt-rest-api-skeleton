@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ * Copyright (c) 2021 Wolf Utz<wpu@hotmail.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -71,7 +71,11 @@ class RouteCollectionProvider extends CachableDataProvider
 
     private function buildRouteCollection(): RouteCollection
     {
-        $configurationFileName = $_ENV['APP_ENV'] === 'prod' ? 'routes.yaml' : 'routes.' . $_ENV['APP_ENV'] . '.yaml';
+        $defaultFile = 'routes.yaml';
+        $configurationFileName = $_ENV['APP_ENV'] === 'prod' ? $defaultFile : 'routes.' . $_ENV['APP_ENV'] . '.yaml';
+        if (!file_exists(APP_ROOT_PATH . 'conf/' . $configurationFileName)) {
+            $configurationFileName = $defaultFile;
+        }
         $configuration = $this->configurationFileService->load($configurationFileName);
 
         return CollectionFactory::build(

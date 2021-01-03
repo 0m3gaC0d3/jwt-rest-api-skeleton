@@ -64,3 +64,7 @@ services:
   OmegaCode\JwtSecuredApiCore\Command\Client\ListClientCommand:
     tags:
       - { name: 'console.command', command: 'api:client:list' }
+
+  OmegaCode\JwtSecuredApiCore\Command\Route\ListRoutesCommand:
+    tags:
+      - { name: 'console.command', command: 'api:route:list' }

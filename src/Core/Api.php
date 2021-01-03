@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ * Copyright (c) 2021 Wolf Utz<wpu@hotmail.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,9 @@ class Api
 
     public function addRoute(string $method, Configuration $config): void
     {
+        if ($config->isDisabled()) {
+            return;
+        }
         $action = $this->getActionService($config->getAction());
         $eventDispatcher = $this->eventDispatcher;
         $cache = $this->cache;
