@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ * Copyright (c) 2021 Wolf Utz<wpu@hotmail.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,10 @@ class ConfigurationFactory
         $name = trim((string) $configuration['name']);
         $action = trim((string) $configuration['action']);
         $route = trim((string) $configuration['route']);
+        $disabled = (bool) ($configuration['disabled'] ?? false);
         $methods = (array) $configuration['methods'];
         $middlewares = (array) ($configuration['middlewares'] ?? []);
 
-        return new Configuration($name, $action, $route, $methods, $middlewares);
+        return new Configuration($name, $action, $route, $disabled, $methods, $middlewares);
     }
 }

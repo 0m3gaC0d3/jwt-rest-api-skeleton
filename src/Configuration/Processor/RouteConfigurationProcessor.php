@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ * Copyright (c) 2021 Wolf Utz<wpu@hotmail.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,44 +29,26 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiCore\Configuration\Processor;
 
 use OmegaCode\JwtSecuredApiCore\Configuration\RouteConfiguration;
-use RuntimeException;
 use Symfony\Component\Config\Definition\Processor;
 
 class RouteConfigurationProcessor implements ConfigurationProcessor
 {
-    public function process(array $configurations): array
+    public function process(array $configs): array
     {
-        $configurations = $this->prepareConfigurations($configurations);
+        $configs = $this->prepareConfigurations($configs);
         $processor = new Processor();
         $configuration = new RouteConfiguration();
-        $processedConfiguration = $processor->processConfiguration($configuration, $configurations);
-        $this->validateUniqueFields($processedConfiguration);
 
-        return $processedConfiguration;
+        return $processor->processConfiguration($configuration, $configs);
     }
 
-    private function prepareConfigurations(array $configurations): array
+    private function prepareConfigurations(array $configs): array
     {
         $result = [];
-        foreach ($configurations as $configuration) {
+        foreach ($configs as $configuration) {
             $result[] = $configuration['routes'];
         }
 
         return $result;
-    }
-
-    private function validateUniqueFields(array $configurations): void
-    {
-        foreach (RouteConfiguration::UNIQUE_FIELDS as $uniqueFieldName) {
-            $values = [];
-            foreach ($configurations as $configuration) {
-                $values[] = $configuration[$uniqueFieldName];
-            }
-            foreach (array_count_values($values) as $key => $value) {
-                if ($value > 1) {
-                    throw new RuntimeException("There is more than one route defined with name \"$key\"!");
-                }
-            }
-        }
     }
 }

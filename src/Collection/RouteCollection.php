@@ -3,7 +3,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2020 Wolf Utz<wpu@hotmail.de>
+ * Copyright (c) 2021 Wolf Utz<wpu@hotmail.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,14 +28,15 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiCore\Collection;
 
-use InvalidArgumentException;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 
 class RouteCollection extends AbstractRouteCollection implements \Serializable
 {
     public function add(Configuration $routeConfig): void
     {
-        $this->validateConfig($routeConfig);
+        if (!$this->validateConfig($routeConfig)) {
+            return;
+        }
         $this->values[] = $routeConfig;
         $this->rewind();
     }
@@ -81,19 +82,15 @@ class RouteCollection extends AbstractRouteCollection implements \Serializable
         $this->values = unserialize($data);
     }
 
-    protected function validateConfig(Configuration $config): void
+    protected function validateConfig(Configuration $config): bool
     {
-        foreach ($this->values as $existingConfig) {
-            if ($existingConfig->getName() === $config->getName()) {
-                throw new InvalidArgumentException('Route with name ' . $config->getName() . ' already exist');
-            }
-            if ($existingConfig->getRoute() != $config->getRoute()) {
-                continue;
-            }
-            if (count(array_intersect($existingConfig->getAllowedMethods(), $config->getAllowedMethods())) > 0) {
-                throw new InvalidArgumentException('Duplicated routes are not allowed with intersecting http methods.' . 'Breaking route name: ' . $config->getName());
-            }
+        $existingConfig = $this->findByName($config->getName());
+        if (!$existingConfig instanceof Configuration) {
+            return true;
         }
+        $existingConfig->unserialize($config->serialize());
+
+        return false;
     }
 
     protected function contains(Configuration $config): bool
