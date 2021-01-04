@@ -73,7 +73,8 @@ class RouteCollectionProvider extends CachableDataProvider
     {
         $defaultFile = 'routes.yaml';
         $configurationFileName = $_ENV['APP_ENV'] === 'prod' ? $defaultFile : 'routes.' . $_ENV['APP_ENV'] . '.yaml';
-        if (!file_exists(APP_ROOT_PATH . 'conf/' . $configurationFileName)) {
+        // @todo: redesign config path definition.
+        if (!file_exists(APP_ROOT_PATH . 'config/' . $configurationFileName)) {
             $configurationFileName = $defaultFile;
         }
         $configuration = $this->configurationFileService->load($configurationFileName);
