@@ -58,7 +58,7 @@ Options:
 
 Examples:
     # Run unit tests
-    .ci/scripts/ciRunner.sh -s build
+    .ci/scripts/console.sh -s build
 EOF
 
 # Test if docker-compose exists, else exit out with error

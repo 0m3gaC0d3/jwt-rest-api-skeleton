@@ -140,12 +140,12 @@ class Configuration implements \Serializable
     public function unserialize($data): void
     {
         $data = unserialize($data);
-        $this->name = $data[0];
-        $this->action = $data[1];
-        $this->route = $data[2];
-        $this->disabled = (bool) $data[3];
-        $this->allowedMethods = $data[4];
-        $this->middlewares = $data[5];
+        $this->name = $data[0] ?? '';
+        $this->action = $data[1] ?? '';
+        $this->route = $data[2] ?? '';
+        $this->disabled = (bool) ($data[3] ?? false);
+        $this->allowedMethods = (array) ($data[4] ?? []);
+        $this->middlewares = (array) ($data[5] ?? []);
     }
 
     public function toArray(): array

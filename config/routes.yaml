@@ -7,12 +7,5 @@ routes:
   -
     name: auth.verify
     route: /auth/verify
-    disabled: true
     methods: [post,options]
     action: OmegaCode\JwtSecuredApiCore\Action\Auth\VerifyAction
-  -
-    name: auth.login
-    route: /auth
-    methods: [post,options]
-    disabled: true
-    action: OmegaCode\JwtSecuredApiCore\Action\Auth\ExtendedAction

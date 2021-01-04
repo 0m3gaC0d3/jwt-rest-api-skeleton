@@ -42,8 +42,11 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-        echo \"Fix quality errors...\";
+        echo \"===============================================\";
+        echo \"Running php-cs-fixer fix\";
         vendor/bin/php-cs-fixer fix --allow-risky=yes
+        echo \"===============================================\";
+        echo \"Running phpcbf\";
         vendor/bin/phpcbf --error-severity=1 --warning-severity=8 --extensions=php
       "
   #======================================================
@@ -56,13 +59,17 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-          echo \"Running phpcs...\";
+          echo \"===============================================\";
+          echo \"Running phpcs\";
           vendor/bin/phpcs --error-severity=1 --warning-severity=8 --extensions=php src;
-          echo \"Running php-cs-fixer...\";
+          echo \"===============================================\";
+          echo \"Running php-cs-fixer\";
           vendor/bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes
-          echo \"Running phpmd...\";
+          echo \"===============================================\";
+          echo \"Running phpmd\";
           vendor/bin/phpmd src text phpmd.xml;
-          echo \"Running phpstan...\";
+          echo \"===============================================\";
+          echo \"Running phpstan\";
           vendor/bin/phpstan analyse -c phpstan.neon
       "
   #======================================================

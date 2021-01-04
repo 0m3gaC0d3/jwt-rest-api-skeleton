@@ -12,7 +12,7 @@ services:
       - ./src:/var/www/html/src:cached
       - ./res:/var/www/html/res:cached
       - ./public:/var/www/html/public:cached
-      - ./conf:/var/www/html/conf:cached
+      - ./config:/var/www/html/config:cached
       - ./keys:/var/www/html/keys:cached
       - ./bin:/var/www/html/bin:cached
       - ./var:/var/www/html/var:cached
