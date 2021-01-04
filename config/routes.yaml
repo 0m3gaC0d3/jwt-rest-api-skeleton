@@ -7,6 +7,5 @@ routes:
   -
     name: auth.verify
     route: /auth/verify
-    disabled: true
     methods: [post,options]
     action: OmegaCode\JwtSecuredApiCore\Action\Auth\VerifyAction
