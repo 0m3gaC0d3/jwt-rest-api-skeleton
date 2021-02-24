@@ -8,4 +8,3 @@ parameters:
         - 'src/Configuration/RouteConfiguration.php'
     ignoreErrors:
         - '#Constant APP_ROOT_PATH not found#'
-        - '#Unable to resolve the template type T#'
