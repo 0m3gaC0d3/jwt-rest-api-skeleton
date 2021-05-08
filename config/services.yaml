@@ -19,24 +19,10 @@ services:
   Monolog\Logger:
     synthetic: true
 
-  api.sql.logger:
-    class: Monolog\Logger
-    factory: [ 'OmegaCode\JwtSecuredApiCore\Factory\LoggerFactory', 'buildSqlLogger' ]
-
   OmegaCode\JwtSecuredApiCore\Error\Handler\ApiErrorRenderer:
     arguments:
       $showErrors: '%env(bool:SHOW_ERRORS)%'
       $logErrors: '%env(bool:ENABLE_LOG)%'
-
-  OmegaCode\JwtSecuredApiCore\Service\DatabaseService:
-    arguments:
-      $databaseName: '%env(string:DATABASE_NAME)%'
-      $user: '%env(string:DATABASE_USER)%'
-      $password: '%env(string:DATABASE_PASSWORD)%'
-      $host: '%env(string:DATABASE_HOST)%'
-      $driver: '%env(string:DATABASE_DRIVER)%'
-      $charSet: '%env(string:DATABASE_CHARSET)%'
-      $enableLog: '%env(bool:ENABLE_SQL_LOG)%'
 
   OmegaCode\JwtSecuredApiCore\Core\Api:
     class: OmegaCode\JwtSecuredApiCore\Core\Api
@@ -44,10 +30,6 @@ services:
       - '@Slim\App'
       - '@Symfony\Component\EventDispatcher\EventDispatcher'
       - '@service_container'
-
-  OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware:
-    arguments:
-      $logger: '@api.sql.logger'
 
   OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand:
     tags:

@@ -33,7 +33,6 @@ use OmegaCode\JwtSecuredApiCore\Middleware\CacheableMiddlewareInterface;
 use OmegaCode\JwtSecuredApiCore\Middleware\CORSMiddleware;
 use OmegaCode\JwtSecuredApiCore\Middleware\JsonWebTokenMiddleware;
 use OmegaCode\JwtSecuredApiCore\Middleware\RequestLoggerMiddleware;
-use OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -72,9 +71,6 @@ class RouteTable
         }
         if ((bool) $_ENV['ENABLE_REQUEST_LOG']) {
             $middlewares[] = RequestLoggerMiddleware::class;
-        }
-        if ((bool) $_ENV['ENABLE_SQL_LOG']) {
-            $middlewares[] = SQLLoggerMiddleware::class;
         }
         if ((bool) $_ENV['ENABLE_REQUEST_CACHE']) {
             $middlewares[] = CacheableMiddlewareInterface::class;

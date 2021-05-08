@@ -38,7 +38,6 @@ use OmegaCode\JwtSecuredApiCore\Factory\CacheAdapterFactory;
 use OmegaCode\JwtSecuredApiCore\Generator\RequestIDGenerator;
 use OmegaCode\JwtSecuredApiCore\Middleware\CORSMiddleware;
 use OmegaCode\JwtSecuredApiCore\Middleware\RequestLoggerMiddleware;
-use OmegaCode\JwtSecuredApiCore\Middleware\SQLLoggerMiddleware;
 use OmegaCode\JwtSecuredApiCore\Route\Configuration;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -130,9 +129,6 @@ class Api
         if ((bool) $_ENV['ENABLE_CORS']) {
             $this->slimApp->add(CORSMiddleware::class);
         }
-        if ((bool) $_ENV['ENABLE_SQL_LOG']) {
-            $router->add(SQLLoggerMiddleware::class);
-        }
         if (count($middlewares) === 0) {
             return;
         }
@@ -144,9 +140,9 @@ class Api
 
     private function getActionService(string $serviceId): AbstractAction
     {
-        $service = trim((string) $serviceId);
+        $service = trim($serviceId);
         if (!$this->container->has($service)) {
-            throw new Exception("Could not find controller service with id: $service");
+            throw new Exception("Could not find service with id: $service");
         }
 
         return $this->container->get($serviceId);

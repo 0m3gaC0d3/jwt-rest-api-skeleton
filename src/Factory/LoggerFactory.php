@@ -41,12 +41,4 @@ class LoggerFactory
 
         return $logger;
     }
-
-    public static function buildSqlLogger(): LoggerInterface
-    {
-        $logger = new Logger('SQL');
-        $logger->pushHandler(new StreamHandler(APP_ROOT_PATH . 'var/log/sql.log', Logger::DEBUG));
-
-        return $logger;
-    }
 }
