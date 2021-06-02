@@ -16,18 +16,18 @@
         "slim/psr7": "^0.5",
         "slim/slim": "^4.1",
         "doctrine/dbal": "^2.10",
-        "symfony/dotenv": "^5.0",
-        "symfony/dependency-injection": "^5.0",
-        "symfony/config": "^5.0",
-        "symfony/yaml": "^5.0",
-        "symfony/event-dispatcher": "^5.0",
+        "symfony/dotenv": "5.2.*",
+        "symfony/dependency-injection": "5.2.*",
+        "symfony/config": "5.2.*",
+        "symfony/yaml": "5.2.*",
+        "symfony/event-dispatcher": "5.2.*",
         "http-interop/http-factory-guzzle": "^1.0",
         "lcobucci/jwt": "3.3.*",
         "cakephp/chronos": "^2.0",
         "monolog/monolog": "^2.0",
         "ramsey/uuid": "^3.9",
-        "symfony/console": "^5.0",
-        "symfony/cache": "^5.0",
+        "symfony/console": "5.2.*",
+        "symfony/cache": "5.2.*",
         "symfony/finder": "^5.1"
     },
     "require-dev": {
@@ -38,7 +38,7 @@
         "phpmd/phpmd": "^2.8",
         "kint-php/kint": "^3.3",
         "guzzlehttp/guzzle": "^6.5",
-        "symfony/var-dumper": "^5.0"
+        "symfony/var-dumper": "5.2.*"
     },
     "autoload": {
         "psr-4": {
